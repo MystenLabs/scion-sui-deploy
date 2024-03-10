@@ -1,0 +1,36 @@
+---
+# -- Variables that may be overridden
+# Number of virtual functions to create on the public interface.
+num_vfs: 1
+# Version and checksum of the anapaya EDGE image to download.
+anapaya_edge:
+  version: sys_v2.8.0-scion_v0.35.1-1
+  checksum: ccb8bb5623c8f1fb355e9d0cc36e3b7010b846b59af98efd4c89b0c3ca459efd
+# URL from which to download the EDGE image.
+anapaya_edge_url: "https://dl.cloudsmith.io/{{ anapaya_edge_access_token }}/anapaya/stable/raw/names/\
+                   anapaya-appliance-base-bios-qcow2/versions/{{ anapaya_edge.version }}/\
+                   anapaya-appliance-base-{{ anapaya_edge.version }}-bios-compressed.qcow2"
+# Directory in which to store deployment files on the remote.
+scion_dir: /var/scion
+deployment_dir: "{{ scion_dir }}/deployment"
+# Directory in which to store libvirt SCION images.
+storage_pool_dir: "{{ scion_dir }}/images"
+
+# -- Internal variables
+# Path to the downloaded Anapaya EDGE image.
+__anapaya_edge_image: >-
+  {{ deployment_dir }}/anapaya-appliance-base-{{ anapaya_edge.version }}-bios-compressed.qcow2
+# Path to the customized Anapaya EDGE image.
+__anapaya_edge_customized_image: >-
+  {{ deployment_dir }}/anapaya-appliance-base-{{ anapaya_edge.version }}-bios-compressed.customized.qcow2
+# Name and capacity of the EDGE storage volume created in libvirt.
+__anapaya_edge_volume: edge-{{ anapaya_edge.version }}-bios-compressed
+__anapaya_edge_volume_capacity: 40G
+# Storage pool to create and store image
+__storage_pool_name: edge-images
+# Name of the libvirt network to create for host to EDGE communication
+__internal_network_name: scion_internal
+# Name, memory, and vcpus of the EDGE domain (VM) created on libvirt
+__anapaya_edge_vm_name: anapaya-edge
+__anapaya_edge_vm_memory_mib: 2048
+__anapaya_edge_vm_vcpus: 2

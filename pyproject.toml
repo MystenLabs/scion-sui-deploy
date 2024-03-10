@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "scion-bare-metal"
+version = "0.1.0"
+description = "Ansible playbook to deploy SCION on a bare-metal host."
+authors = ["Mysten Labs <info@mystenlabs.com>"]
+readme = "README.md"
+packages = [{include = "filter_plugins", from = "ansible"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+ansible = "^9.3"
+pyyaml = "^6.0"
+libvirt-python = "^10.1.0"
+lxml = "^5.1.0"
+
+[tool.poetry.group.dev.dependencies]
+ansible-lint = { version = "^24.2.0", markers = "platform_system != 'Windows'" }
+ruff = "^0.3.0"
+black = "^24.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+generate_defaults = 'scripts.generate_defaults:main'
+
+[tool.ruff]
+select = ["E", "F", "I", "B", "Q", "W"]
+src = ["ansible/filter_plugins"]

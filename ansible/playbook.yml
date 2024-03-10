@@ -1,0 +1,97 @@
+---
+- name: Configure the VM host and deploy the EDGE
+  hosts: bare-metal
+  gather_facts: true
+  vars_files:
+    - vars.yml
+  environment:
+    # All libvirt operations are done to the system-level service.
+    LIBVIRT_DEFAULT_URI: "qemu:///system"
+  tasks:
+    - name: Install package dependencies
+      ansible.builtin.apt:
+        package:
+          - qemu-kvm
+          - cloud-utils
+          - libvirt-daemon-system
+          - libguestfs-tools
+          - virtinst
+        update_cache: true
+      become: true
+
+    - name: Add the remote user to the libvirt group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: libvirt
+        append: true
+      become: true
+      notify: reset-ssh
+
+    - name: Flush handlers to update user's groups, if required
+      ansible.builtin.meta: flush_handlers
+
+    - name: Create deployment directory
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "u=rwX,g=rX,o=rX"
+        owner: "{{ ansible_user }}"
+      loop:
+        - "{{ scion_dir }}"
+        - "{{ deployment_dir }}"
+      become: true
+
+    - name: Virtualize the public interface
+      ansible.builtin.import_tasks: tasks/virtualize_iface.yml
+
+    - name: Prepare the internal network
+      ansible.builtin.import_tasks: tasks/prepare_network.yml
+
+    - name: Prepare the EDGE storage volume
+      ansible.builtin.import_tasks: tasks/prepare_volume.yml
+
+    - name: Flush all handlers to ensure system readiness to run the VM
+      ansible.builtin.meta: flush_handlers
+
+    - name: Kick-off the VM installation and immediately continue
+      vars:
+        host_device: >-
+          {{ 'pci_' ~ (ansible_facts[br_interface].pciid | replace('.', '_') | replace (':', '_')) }}
+      ansible.builtin.command: >-
+        virt-install --name {{ __anapaya_edge_vm_name }} --virt-type kvm
+        --memory {{ __anapaya_edge_vm_memory_mib }} --vcpus {{ __anapaya_edge_vm_vcpus }} --cpu host
+        --boot hd --disk vol={{ __storage_pool_name }}/{{ __anapaya_edge_volume }}
+        --os-variant ubuntu22.04 --graphics none --network network={{ __internal_network_name }}
+        --host-device {{ host_device }} --noautoconsole
+      changed_when: true
+
+  handlers:
+    - name: Reset the SSH connection
+      ansible.builtin.meta: reset_connection
+
+    - name: Update grub # noqa: no-changed-when
+      ansible.builtin.command: update-grub
+      become: true
+      listen: "update-grub"
+
+    - name: Reboot the bare-metal host.
+      ansible.builtin.reboot:
+        msg: "Rebooting machine in 5 seconds"
+      become: true
+      listen: "reboot-host"
+
+        # - name: TODO 2
+        #   hosts: edge
+        #   gather_facts: false
+        #   tasks:
+        #     - name: Wait 2mins for the EDGE to become accessible
+        #       ansible.builtin.wait_for_connection:
+        #         timeout: 120
+        #         sleep: 3
+        #
+        #     - name: Gather facts for first time
+        #       ansible.builtin.setup:
+        #
+        #     - name: Debug
+        #       ansible.builtin.debug:
+        #         msg: "{{ ansible_facts }}"

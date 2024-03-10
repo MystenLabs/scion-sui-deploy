@@ -1,0 +1,17 @@
+---
+all:
+  hosts:
+    bare-metal:
+      # -- SSH options
+      ansible_host: 103.88.234.53
+      ansible_user: ubuntu
+      # -- Configuration
+      public_iface: eno1
+      anapaya_edge_access_token: j37Is4WiEXc5rDit
+      ssh_authorized_keys:
+        - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK/ALpkZY66QR/uYrn4g9/GAjOM5cJ2lKbZrzzMhAg7X jean-pierre@mystenlabs.com"
+
+    edge:
+      ansible_user: anapaya
+      ansible_host: 169.254.1.2
+      ansible_ssh_common_args: "-J {{ hostvars['bare-meta']['ansible_user'] ~ '@' ~ hostvars['bare-metal']['ansible_host'] }}"

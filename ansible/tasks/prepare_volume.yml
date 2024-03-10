@@ -1,0 +1,106 @@
+---
+# Downloads the Anapaya EDGE image, customizes it, and uploads it to the libvirt storage pool.
+#
+# Returns:
+#   __storage_pool_name stores the name of store pool with the created volume.
+#   __anapaya_edge_volume stores the name of the volume.
+- name: Create the storage pool
+  block:
+    - name: Create the directory for the storage pool
+      ansible.builtin.file:
+        path: "{{ storage_pool_dir }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        mode: "u=rwX,g=rX,o=rX"
+
+    - name: Define the storage pool
+      ansible.builtin.command: >-
+        virsh pool-define-as --name {{ __storage_pool_name }} --type dir
+        --target {{ storage_pool_dir }}
+      changed_when: __define_pool.rc == 0
+      failed_when: '__define_pool.rc != 0 and "already exists" not in __define_pool.stderr'
+      register: __define_pool
+
+    - name: Enable the pool being autostarted  # noqa: no-handler
+      when: __define_pool.changed
+      ansible.builtin.command: virsh pool-autostart {{ __storage_pool_name }}
+      changed_when: true
+
+    - name: Start the storage pool # noqa: no-handler
+      when: __define_pool.changed
+      ansible.builtin.command: virsh pool-start {{ __storage_pool_name }}
+      changed_when: true
+
+- name: Download the Anapaya EDGE image
+  ansible.builtin.get_url:
+    url: "{{ anapaya_edge_url }}"
+    checksum: "sha256:{{ anapaya_edge.checksum }}"
+    dest: "{{ __anapaya_edge_image }}"
+    mode: "u=rw,g=r,o=r"
+  register: __edge_download
+
+- name: Get information about any existing EDGE storage volume
+  ansible.builtin.command: virsh vol-info {{ __anapaya_edge_volume }} --pool {{ __storage_pool_name }}
+  register: __edge_volume_info
+  failed_when:
+    - __edge_volume_info.rc != 0
+    - "'Storage volume not found' not in __edge_volume_info.stderr"
+  changed_when: false
+
+- name: Customize the downloaded EDGE image
+  when: __edge_download.changed or __edge_volume_info.rc != 0
+  vars:
+    __edge_cloud_cfg_dir: /etc/cloud/cloud.cfg.d
+    __edge_cloud_cfg_path: "{{ __edge_cloud_cfg_dir }}/99-installer.cfg"
+    __extracted_edge_cloud_cfg_path: "{{ deployment_dir }}/99-installer.cfg"
+  block:
+    - name: Create a copy of the original image
+      ansible.builtin.copy:
+        src: "{{ __anapaya_edge_image }}"
+        remote_src: true
+        dest: "{{ __anapaya_edge_customized_image }}"
+        mode: "u=rw,g=r,o=r"
+
+    - name: Extract the hardened cloud-config from the image
+      ansible.builtin.command: >-
+        virt-copy-out -a '{{ __anapaya_edge_customized_image }}' '{{ __edge_cloud_cfg_path }}'
+        '{{ deployment_dir }}'
+      become: true
+      changed_when: true
+
+    - name: Read the cloud-config into memory
+      ansible.builtin.slurp:
+        path: "{{ __extracted_edge_cloud_cfg_path }}"
+      register: __edge_cloud_cfg
+
+    - name: Modify and write the cloud-config back to the remote
+      vars:
+        # Use indirection here to fix the type passed to the filter
+        ssh_keys: "{{ ssh_authorized_keys }}"
+      ansible.builtin.copy:
+        dest: "{{ __extracted_edge_cloud_cfg_path }}"
+        content: >-
+          {{ __edge_cloud_cfg.content | b64decode | customize_cloud_config(ssh_keys) }}
+        mode: "u=rw,g=r,o=r"
+
+    - name: Reinsert the modified cloud-config into the image
+      ansible.builtin.command: >-
+        virt-copy-in -a '{{ __anapaya_edge_customized_image }}' '{{ __extracted_edge_cloud_cfg_path }}'
+        '{{ __edge_cloud_cfg_dir }}'
+      become: true
+      changed_when: true
+
+    - name: Create a storage volume based on the customized EDGE image
+      when: __edge_download.changed or __edge_volume_info.rc != 0
+      block:
+        - name: Create the volume definition
+          ansible.builtin.command: >-
+            virsh vol-create-as {{ __storage_pool_name }} {{ __anapaya_edge_volume }} {{ __anapaya_edge_volume_capacity }}
+            --format qcow2
+          changed_when: true
+
+        - name: Upload the data to the volume
+          ansible.builtin.command: >-
+            virsh vol-upload {{ __anapaya_edge_volume }} {{ __anapaya_edge_customized_image }}
+            --pool {{ __storage_pool_name }}
+          changed_when: true
