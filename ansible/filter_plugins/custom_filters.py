@@ -10,7 +10,22 @@ class FilterModule:
         return {
             "select_vfs_from_stat_result": select_vfs_from_stat_result,
             "customize_cloud_config": customize_cloud_config,
+            "scion_ia_to_tag": scion_ia_to_tag,
         }
+
+
+def scion_ia_to_tag(
+    isd_as: str, sep: str = "_", isd_prefix="isd", asn_prefix="as"
+) -> str:
+    """Convert a SCION ISD-AS number to the format isd<isd>_as<asn>
+
+    Colons are replaced with underscores in the AS number. The ISD and
+    AS parts are separated with sep.
+    """
+    (isd, asn) = isd_as.split("-")
+    asn = asn.replace(":", "_")
+
+    return f"{isd_prefix}{isd}{sep}{asn_prefix}{asn}"
 
 
 def select_vfs_from_stat_result(stat_results: list[dict], parent_pci: str) -> list[str]:

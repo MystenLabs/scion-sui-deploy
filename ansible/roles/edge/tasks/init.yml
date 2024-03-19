@@ -1,0 +1,17 @@
+---
+- name: Allow the anapaya user to run all commands
+  community.general.sudoers:
+    name: allow-anapaya
+    state: present
+    user: anapaya
+    commands: ALL
+  become: true
+
+- name: Disable SSH password authentication
+  ansible.builtin.lineinfile:
+    path: '/etc/ssh/ssh_config'
+    regexp: '^(.*)PasswordAuthentication(.*)$'
+    line: 'PasswordAuthentication no'
+  become: true
+  notify:
+    - "edge : restart sshd"

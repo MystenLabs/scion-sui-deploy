@@ -1,0 +1,5 @@
+---
+- name: Initialize system
+  ansible.builtin.import_tasks: init.yml
+- name: Configure appliance
+  ansible.builtin.import_tasks: appliance.yml

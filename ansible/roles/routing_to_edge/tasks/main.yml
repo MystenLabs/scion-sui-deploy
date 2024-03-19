@@ -1,0 +1,3 @@
+---
+- name: Set up BGP
+  ansible.builtin.import_tasks: bgp.yml

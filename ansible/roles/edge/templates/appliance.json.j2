@@ -1,0 +1,156 @@
+{
+    "config": {
+        "management": {
+            "telemetry": {
+                "address": "127.0.0.1:42001"
+            },
+            "api": {
+                "listeners": [
+                    {
+                        "address": "127.0.0.1:443",
+                        "description": "localhost"
+                    }
+                ],
+                "basic_auth": {
+                    "enabled": true,
+                    "users": [
+                        {
+                            "username": "anapaya",
+                            "password_hashed": "$2a$10$W7LRMh1MAA7ptvA335U3g.WXMaCb.EHjUCKILXUkjKdm9lJV/0FBC"
+                        }
+                    ]
+                }
+            }
+        },
+        "interfaces": {
+            "ethernets": {{ edge_ethernets | to_nice_json }}
+        },
+        "scion": {
+            "ases": [
+                {
+                    "control": {
+                        "address": "{{ edge_internal_ipv4 }}:30252",
+                        "enabled": true
+                    },
+                    "cppki": {
+                        "issuers": [
+                            {
+                                "isd_as": "{{ edge_issuer_isd_as }}",
+                                "priority": 0
+                            }
+                        ]
+                    },
+                    "details": {
+                        "name": "{{ edge_scion_name }}"
+                    },
+                    "isd_as": "{{ edge_isd_as }}",
+                    "router": {
+                        "enabled": true,
+                        "internal_interface": "{{ edge_internal_ipv4 }}:{{ edge_router_internal_port }}"
+                    },
+                    "scion_mtu": 1472,
+                    "neighbors": {{ edge_neighbors | to_nice_json }},
+                    "forwarding_key": "{{ edge_forwarding_key }}"
+                }
+            ]
+        },
+        "scion_tunneling": {
+            "endpoint": {
+                "enabled": true,
+                "ip": "{{ edge_internal_ipv4 }}"
+            },
+            "domains": [
+{%  for item in (edge_advertised_ranges | rejectattr('isd_as', 'match', edge_isd_as)) %}
+                {
+                    "name": "{{ item.isd_as  }}",
+                    "remote_isd_ases": [
+                        {
+                            "isd_as": "{{ item.isd_as }}",
+                            "action": "ACCEPT",
+                            "sequence_id": 0
+                        }
+                    ],
+                    "prefixes": {
+                        "accept_filter": [
+                            {
+                                "prefixes": {{ item.cidr_ranges | to_json }},
+                                "action": "ACCEPT",
+                                "sequence_id": 0
+                            }
+                        ],
+                        "announce_filter": [
+                            {
+                                "prefixes": [
+                                "0.0.0.0/0"
+                                ],
+                                "action": "ACCEPT",
+                                "sequence_id": 0
+                            }
+                        ]
+                    },
+                    "traffic_policies": [
+                        {
+                            "sequence_id": 0,
+                            "traffic_matcher": "default",
+                            "failover_sequence": [
+                                {
+                                "sequence_id": 0,
+                                "path_filter": "allow_all"
+                                }
+                            ]
+                        }
+                    ]
+                }{{ "," if not loop.last else "" }}
+{%  endfor %}
+            ],
+            "remotes": [
+{%  for item in (edge_advertised_ranges | rejectattr('isd_as', 'match', edge_isd_as)) %}
+                {"isd_as": "{{ item.isd_as }}"}{{ "," if not loop.last else "" }}
+{%  endfor %}
+            ],
+            "static_announcements": [
+                {
+                    "prefixes": {{
+                        (edge_advertised_ranges | items2dict(key_name='isd_as', value_name='cidr_ranges'))[edge_isd_as]
+                        | to_nice_json }},
+                    "sequence_id": 0
+                }
+            ],
+            "traffic_matchers": [
+                {
+                    "condition": "BOOL=true",
+                    "name": "default"
+                }
+            ],
+            "path_filters": [
+                {
+                    "name": "allow_all",
+                    "description": "Allow all paths",
+                    "acl": [
+                        "+ 0"
+                    ]
+                }
+            ]
+        }
+        {%- if edge_bgp_neighbor_address != "" -%},
+        "bgp": {
+            "global": {
+                "as": {{ edge_bgp_asn }},
+                "router_id": "{{ edge_internal_ipv4 }}"
+            },
+            "neighbors": [
+                {
+                    "enabled": true,
+                    "neighbor_address": "{{ edge_bgp_neighbor_address }}",
+                    "peer_as": {{ edge_bgp_peer_asn }},
+                    "timers": {
+                        "hold_time": 3,
+                        "keepalive_interval": 1,
+                        "minimum_advertisement_interval": 1,
+                    }
+                }
+            ]
+        }
+        {%- endif %}
+    }
+}

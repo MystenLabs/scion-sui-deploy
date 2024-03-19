@@ -1,0 +1,201 @@
+---
+argument_specs:
+  main:
+    description: Configure Anapaya EDGE
+
+    options:
+      edge_isd_as:
+        description: The SCION ISD-AS of the host
+        type: str
+        required: true
+
+      edge_trcs_dir:
+        description: Directory containing TRC files for the deployment.
+        type: path
+        required: true
+
+      edge_forwarding_key:
+        description: Base64-encoded forwarding key
+        type: str
+        required: true
+
+      edge_scion_cert_directory:
+        description: Directory on the EDGE appliance where certificates and keys are stored
+        type: path
+        default: '/etc/scion/crypto/{{ edge_isd_as | scion_ia_to_tag(sep="-", isd_prefix="", asn_prefix="") }}/cert/'
+
+      edge_scion_cert_key_filename_without_suffix:
+        description: Filename for certificates and keys on the EDGE appliance
+        type: str
+        default: "{{ edge_scion_cert_directory }}/\
+          {{ edge_isd_as | scion_ia_to_tag(sep='-', isd_prefix='ISD', asn_prefix='AS') }}.0000-00-00-00-00-00"
+
+      edge_key_local_path:
+        description: Path to the AS's CP key
+        type: path
+        default: "files/tmp/{{ edge_isd_as | scion_ia_to_tag }}.key"
+
+      edge_cert_local_path:
+        description: Path to the AS's CP key
+        type: path
+        default: "files/tmp/{{ edge_isd_as | scion_ia_to_tag }}.pem"
+
+      edge_force_replace_cert_key:
+        description: Whether to replace the existing key and cert if they exist
+        type: bool
+        default: false
+
+      edge_neighbors:
+        description: >
+          Neighbor configuration for the appliance.json, see
+          https://docs.anapaya.net/en/latest/configuration/scion/#neighbors.
+        type: list
+        required: true
+        elements: dict
+        options:
+          neighbor_isd_as:
+            type: str
+            required: true
+          relationship:
+            type: str
+            required: true
+          interfaces:
+            type: list
+            required: true
+            elements: dict
+            options:
+              address:
+                type: str
+                required: true
+              administrative_state:
+                type: str
+                required: true
+              interface_id:
+                type: str
+                required: true
+              remote:
+                type: dict
+                required: true
+                options:
+                  address:
+                    type: str
+                    required: true
+                  interface_id:
+                    type: str
+              scion_mtu:
+                type: str
+                required: true
+
+      edge_ethernets:
+        description: >
+          The ethernets for the appliance.json configuration, see
+          https://docs.anapaya.net/en/latest/configuration/interfaces/#ethernet-interfaces.
+        type: list
+        elements: dict
+        options:
+          name:
+            description: The network interface name
+            type: str
+            required: true
+          addresses:
+            description: List of addresses with prefix length
+            type: list
+            required: true
+            elements: str
+          driver:
+            description: The driver which should be used for the interface
+            type: str
+          gateway:
+            description: The gateway for the network interface.
+            type: dict
+            options:
+              ipv4_gateway:
+                type: str
+              ipv6_gateway:
+                type: str
+          mtu:
+            description: Interface MTU
+            type: int
+
+          routes:
+            description: Explicit routes configured for this interface
+            type: list
+            elements: dict
+            options:
+              from:
+                type: str
+              metric:
+                type: int
+              sequence_id:
+                type: int
+                required: true
+              to:
+                type: str
+                required: true
+              via:
+                type: str
+                required: true
+
+      edge_advertised_ranges:
+        description: The list of IP ranges advertised by the AS SIGs
+        type: list
+        elements: dict
+        options:
+          isd_as:
+            description: The ISD-AS from which the advertisement should originate.
+            type: str
+          cidr_ranges:
+            description: List of CIDR ranges to advertise
+            type: list
+            elements: str
+        required: true
+
+      edge_issuer_isd_as:
+        description: The ISD-AS of the CA AS
+        type: str
+        required: true
+
+      edge_scion_name:
+        description: The name to be used for the AS
+        type: str
+        required: true
+
+      edge_internal_ipv4:
+        description: The internal IP address of the EDGE instance
+        type: str
+        required: true
+
+      edge_router_internal_port:
+        description: The internal port where the border router is accessible
+        type: str
+        required: true
+
+      edge_bgp_neighbor_address:
+        description: >
+          The IP address of the BGP router of the Sui instance
+
+          If empty, no BGP configuration will be added.
+        type: str
+        default: ""
+
+      edge_bgp_asn:
+        description: The (private) ASN to use for BGP on the EDGE
+        type: int
+        default: 65001
+
+      edge_bgp_peer_asn:
+        description: The (private) ASN to use for BGP on the Sui instance
+        type: int
+        default: 65002
+
+      edge_extra_config:
+        description: Additional sections to add to the EDGE config.
+        type: dict
+        options:
+          firewall:
+            description: Firewall configuration section to add to the config.
+            type: dict
+          system:
+            description: System configuration section to add to the config.
+            type: dict
+        default: {}

@@ -1,0 +1,21 @@
+---
+- name: Restart the systemd network service
+  become: true
+  ansible.builtin.systemd:
+    name: systemd-networkd.service
+    state: restarted
+  listen: "routing_to_edge : restart networkd"
+
+- name: Restart the nftables service
+  become: true
+  ansible.builtin.systemd:
+    name: nftables.service
+    state: restarted
+  listen: "routing_to_edge : restart nftables"
+
+- name: Restart the frr service
+  become: true
+  ansible.builtin.systemd:
+    name: frr.service
+    state: restarted
+  listen: "routing_to_edge : restart frr"

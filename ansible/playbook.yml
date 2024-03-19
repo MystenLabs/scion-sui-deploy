@@ -65,6 +65,12 @@
         --host-device {{ host_device }} --noautoconsole
       changed_when: true
 
+    - name: Wait 5m for the VM installation to complete
+      ansible.builtin.wait_for:
+        path: /home/anapaya/.setup_complete
+        timeout: 300
+        sleep: 10
+
   handlers:
     - name: Reset the SSH connection
       ansible.builtin.meta: reset_connection
@@ -79,19 +85,3 @@
         msg: "Rebooting machine in 5 seconds"
       become: true
       listen: "reboot-host"
-
-        # - name: TODO 2
-        #   hosts: edge
-        #   gather_facts: false
-        #   tasks:
-        #     - name: Wait 2mins for the EDGE to become accessible
-        #       ansible.builtin.wait_for_connection:
-        #         timeout: 120
-        #         sleep: 3
-        #
-        #     - name: Gather facts for first time
-        #       ansible.builtin.setup:
-        #
-        #     - name: Debug
-        #       ansible.builtin.debug:
-        #         msg: "{{ ansible_facts }}"

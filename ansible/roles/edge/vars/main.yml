@@ -1,0 +1,5 @@
+---
+edge_home_directory: "/home/anapaya"
+edge_cli_config_directory: "{{ edge_home_directory }}/.appliance-cli"
+edge_cli_config_file: "appliances.json"
+edge_cli_context_file: "context.json"
