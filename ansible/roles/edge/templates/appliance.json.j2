@@ -53,7 +53,8 @@
                     "forwarding_key": "{{ edge_forwarding_key }}"
                 }
             ]
-        },
+        }
+        {% if edge_advertised_ranges|length %},
         "scion_tunneling": {
             "endpoint": {
                 "enabled": true,
@@ -132,6 +133,7 @@
                 }
             ]
         }
+        {% endif %}
         {%- if edge_bgp_neighbor_address != "" -%},
         "bgp": {
             "global": {

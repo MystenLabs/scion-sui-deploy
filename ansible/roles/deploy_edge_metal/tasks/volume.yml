@@ -94,7 +94,7 @@
         - name: volume | Create the volume definition
           ansible.builtin.command: >-
             virsh vol-create-as {{ __deploy_edge_metal_storage_pool_name }}
-            {{ __deploy_edge_metal_volume_name }} {{ __anapaya_edge_volume_capacity }}
+            {{ __deploy_edge_metal_volume_name }} {{ __deploy_edge_metal_volume_capacity }}
             --format qcow2
           changed_when: true
 

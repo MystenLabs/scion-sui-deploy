@@ -1,4 +1,5 @@
 ---
-- isd_as: 17-ffaa:1:ebb
-  cidr_ranges:
-    - 103.88.234.245/32
+[]
+# - isd_as: 17-ffaa:1:ebb
+#   cidr_ranges:
+#     - 103.88.234.245/32

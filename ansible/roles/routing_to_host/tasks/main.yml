@@ -32,12 +32,10 @@
 - name: Add DNS entries for public interface
   vars:
     device_service: sys-subsystem-net-devices-{{ routing_to_host_interface }}.device
-  ansible.builtin.copy:
-    dest: /etc/systemd/resolved.conf.d/manual-dns.conf
-    content: |
-      [Resolve]
-      DNS={{ routing_to_host_dns_servers | join(' ') }}
-    mode: "u=rw,g=r,o=r"
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: "^#?DNS="
+    line: "DNS={{ routing_to_host_dns_servers | join(' ') }}"
   become: true
   register: __resolved
 

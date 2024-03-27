@@ -1,12 +1,16 @@
 ---
 - name: Configure the EDGE appliance
-  hosts: edge_vm
+  hosts: edge_vms
   gather_facts: false
   vars_files:
     - "{{ deployment_package_config }}"
   vars:
-    host_ipv4: "{{ hostvars['bare_metal']['public_ipv4'] }}"
+    host_ipv4: "{{ hostvars[vm_host]['public_ipv4'] }}"
   pre_tasks:
+    - name: Wait up to 5m for a connection to the EDGE
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
     - name: Wait up to 5m for the VM installation to complete
       ansible.builtin.wait_for:
         path: /home/anapaya/.setup_complete
@@ -35,7 +39,6 @@
           driver: LINUX
           addresses:
             - 169.254.1.2/24
-
         - name: enp5s0
           driver: VPP_DPDK
           gateway:

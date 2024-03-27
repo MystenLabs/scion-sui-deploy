@@ -1,6 +1,6 @@
 ---
 - name: Configure the VM host and deploy the EDGE VM
-  hosts: bare_metal
+  hosts: bare_metal_hosts
   gather_facts: false
   vars_files:
     - "{{ deployment_package_config }}"
@@ -15,4 +15,4 @@
 
     - role: routing_to_edge
       routing_to_edge_interface: "{{ public_interface }}"
-      routing_to_edge_edge_ipv4: "{{ hostvars['edge_vm']['public_ipv4'] }}"
+      routing_to_edge_edge_ipv4: "{{ hostvars[hosted_edge]['public_ipv4'] }}"

@@ -18,8 +18,8 @@
     - "intel_iommu=on"
     - "iommu=pt"
   notify:
-    - "metal_host : update grub"
-    - "metal_host : reboot host"
+    - "deploy_edge_metal : update grub"
+    - "deploy_edge_metal : reboot host"
 
 - name: interface | Virtualize the public interface (timeout 120s)
   ansible.builtin.replace:
