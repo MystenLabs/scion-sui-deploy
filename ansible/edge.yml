@@ -1,0 +1,44 @@
+---
+- name: Configure the EDGE appliance
+  hosts: edge_vm
+  gather_facts: false
+  vars_files:
+    - "{{ deployment_package_config }}"
+  vars:
+    host_ipv4: "{{ hostvars['bare_metal']['public_ipv4'] }}"
+  pre_tasks:
+    - name: Wait up to 5m for the VM installation to complete
+      ansible.builtin.wait_for:
+        path: /home/anapaya/.setup_complete
+        timeout: 300
+        sleep: 10
+  roles:
+    - role: routing_to_host
+      routing_to_host_host_ip: "{{ host_ipv4 }}"
+
+    - role: edge
+      edge_isd_as: "{{ package_isd_as }}"
+      edge_issuer_isd_as: "{{ package_issuer_isd_as }}"
+      edge_scion_name: "{{ package_common_name }}"
+      edge_trcs_dir: "{{ scion_trcs_path }}"
+      edge_key_local_path: "{{ scion_private_key_path }}"
+      edge_cert_local_path: "{{ scion_certificate_path }}"
+      edge_router_internal_port: 30999
+      edge_forwarding_key: "{{ lookup('ansible.builtin.file', scion_forwarding_key_path) }}"
+      edge_internal_ipv4: "{{ network_config.ipv4_cidr | ansible.utils.ipaddr('address') }}"
+      edge_bgp_neighbor_address: "{{ host_ipv4 }}"
+      edge_neighbors: "{{ package_scion_neighbors }}"
+      edge_advertised_ranges: >-
+        {{ lookup('ansible.builtin.file', 'files/advertised_ip_ranges.yml') | from_yaml }}
+      edge_ethernets:
+        - name: enp1s0
+          driver: LINUX
+          addresses:
+            - 169.254.1.2/24
+
+        - name: enp5s0
+          driver: VPP_DPDK
+          gateway:
+            ipv4_gateway: "{{ network_config.gateway }}"
+          addresses:
+            - "{{ network_config.ipv4_cidr }}"

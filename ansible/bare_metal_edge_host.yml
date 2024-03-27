@@ -1,0 +1,18 @@
+---
+- name: Configure the VM host and deploy the EDGE VM
+  hosts: bare_metal
+  gather_facts: false
+  vars_files:
+    - "{{ deployment_package_config }}"
+  environment:
+    # All libvirt operations are done to the system-level service.
+    LIBVIRT_DEFAULT_URI: "qemu:///system"
+  roles:
+    - role: deploy_edge_metal
+      deploy_edge_metal_public_interface: "{{ public_interface }}"
+      deploy_edge_metal_ssh_keys: "{{ ssh_authorized_keys }}"
+      deploy_edge_metal_download: "{{ package_edge_download }}"
+
+    - role: routing_to_edge
+      routing_to_edge_interface: "{{ public_interface }}"
+      routing_to_edge_edge_ipv4: "{{ hostvars['edge_vm']['public_ipv4'] }}"

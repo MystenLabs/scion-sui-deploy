@@ -1,10 +1,10 @@
 ---
-- name: Define the scion_internal network
+- name: network | Define the scion_internal network
   ansible.builtin.command:
     cmd: virsh net-define /dev/stdin
     stdin: |
       <network>
-        <name>{{ __internal_network_name }}</name>
+        <name>{{ __deploy_edge_metal_internal_network_name }}</name>
         <title>Host to SCION Edge communication</title>
         <description>A link local network between the host and the SCION Edge guest VM</description>
         <bridge name="virbr_scion" stp="on" macTableManager="libvirt"/>
@@ -20,12 +20,12 @@
   failed_when: '__define_network.rc != 0 and "already exists" not in __define_network.stderr'
   changed_when: __define_network.rc == 0
 
-- name: Autostart the network
-  ansible.builtin.command: virsh net-autostart {{ __internal_network_name }}
+- name: network | Autostart the network
+  ansible.builtin.command: virsh net-autostart {{ __deploy_edge_metal_internal_network_name }}
   changed_when: __define_network.changed
 
-- name: Start the network
-  ansible.builtin.command: virsh net-start --network {{ __internal_network_name }}
+- name: network | Start the network
+  ansible.builtin.command: virsh net-start --network {{ __deploy_edge_metal_internal_network_name }}
   register: __start_result
   changed_when: __start_result.rc == 0
   failed_when: __start_result.rc != 0 and "network is already active" not in __start_result.stderr

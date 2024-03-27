@@ -34,6 +34,7 @@ def select_vfs_from_stat_result(stat_results: list[dict], parent_pci: str) -> li
     Return the names of virtual function interfaces in stat_result that
     have parent_pci as their physical function.
     """
+    assert isinstance(stat_results, list), "`state_results` were not provided as a list"
     return [
         result["item"]
         for result in stat_results

@@ -1,0 +1,40 @@
+---
+argument_specs:
+  main:
+    description: Deploy an Anapaya EDGE instance on a metal host
+
+    options:
+      deploy_edge_metal_public_interface:
+        description: Public interface to be virtualized and shared with the EDGE VM.
+        type: str
+        required: true
+
+      deploy_edge_metal_ssh_keys:
+        description: SSH public keys to add to the authorized keys of the EDGE.
+        type: list
+        elements: str
+        required: true
+
+      deploy_edge_metal_download:
+        description: Version and checksum of the anapaya EDGE appliance to install.
+        type: dict
+        options:
+          access_token:
+            description: Access token used to download the appliance.
+            type: str
+            required: true
+            no_log: true
+          version:
+            description: The version of the EDGE appliance to install.
+            type: str
+            required: true
+          checksum:
+            description: The checksum associated with the above version.
+            type: str
+            required: true
+        required: true
+
+      deploy_edge_metal_num_vfs:
+        description: Number of virtual functions to create on the public interface.
+        type: int
+        default: 1

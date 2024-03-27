@@ -1,0 +1,50 @@
+---
+- name: Add a service to maintain a link-scoped route to the host
+  vars:
+    device_service: sys-subsystem-net-devices-{{ routing_to_host_interface }}.device
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/host-route.service
+    content: |
+      [Unit]
+      Description=Host route {{ routing_to_host_interface }}
+      BindsTo={{ device_service }}
+      After={{ device_service }}
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStart=/usr/bin/ip route add {{ routing_to_host_host_ip }} dev {{ routing_to_host_interface }}
+      ExecStop=/usr/bin/ip route del {{ routing_to_host_host_ip }} dev {{ routing_to_host_interface }}
+
+      [Install]
+      WantedBy={{ device_service }}
+    mode: "u=rw,g=r,o=r"
+  become: true
+
+- name: Start the service managing the route
+  ansible.builtin.systemd_service:
+    service: host-route
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true
+
+- name: Add DNS entries for public interface
+  vars:
+    device_service: sys-subsystem-net-devices-{{ routing_to_host_interface }}.device
+  ansible.builtin.copy:
+    dest: /etc/systemd/resolved.conf.d/manual-dns.conf
+    content: |
+      [Resolve]
+      DNS={{ routing_to_host_dns_servers | join(' ') }}
+    mode: "u=rw,g=r,o=r"
+  become: true
+  register: __resolved
+
+- name: Start/restart the DNS resolver
+  ansible.builtin.systemd_service:
+    service: systemd-resolved
+    state: "{{ __resolved.changed | ternary('restarted', 'started') }}"
+    enabled: true
+    daemon_reload: true
+  become: true

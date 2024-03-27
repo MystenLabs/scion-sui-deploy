@@ -1,0 +1,78 @@
+---
+# Virtualize the public interface on the host to create an interface for the EDGE.
+#
+# Sets facts:
+#   __deploy_edge_metal_router_interface:
+#     The name of the interface to pass through to the EDGE. May be undefined, for example, if the
+#     interface has already been passed to the VM.
+
+- name: interface | Enable kernel Intel IOMMU command-line parameters
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="((?:(?!{{ item }}).)*?)"$'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ item }}"'
+    backup: true
+    backrefs: true
+  loop:
+    - "intel_iommu=on"
+    - "iommu=pt"
+  notify:
+    - "metal_host : update grub"
+    - "metal_host : reboot host"
+
+- name: interface | Virtualize the public interface (timeout 120s)
+  ansible.builtin.replace:
+    path: "/sys/class/net/{{ deploy_edge_metal_public_interface }}/device/sriov_numvfs"
+    regexp: "^0$"
+    replace: "{{ deploy_edge_metal_num_vfs }}"
+    unsafe_writes: true  # Require due to writing to a device file
+  become: true
+  # The write may break SSH connectivity, use async to keep the play alive.
+  async: 120
+  poll: 5
+  register: __virtualize_result
+
+- name: interface | Make the virtual function persistent
+  vars:
+    pciid: "{{ ansible_facts[deploy_edge_metal_public_interface]['pciid'] }}"
+  ansible.builtin.copy:
+    dest: "/etc/udev/rules.d/{{ deploy_edge_metal_public_interface }}.rules"
+    content: >
+      ACTION=="add", SUBSYSTEM=="net", KERNELS=="{{ pciid }}",
+      ATTR{device/sriov_numvfs}="{{ deploy_edge_metal_num_vfs }}"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+    # Use unsafe writes as ansible's atomic write approach does not work with device files.
+    unsafe_writes: true
+  become: true
+
+- name: interface | Update the facts to reflect the virtualized interface # noqa: no-handler
+  ansible.builtin.setup:
+    gather_subset: ["!all", "!min", "interfaces"]
+  when: __virtualize_result.changed
+
+- name: interface | Identify the newly created virtual function
+  block:
+    - name: interface | Determine the parent interfaces of all present virtual functions
+      ansible.builtin.stat:
+        path: /sys/class/net/{{ item }}/device/physfn
+        get_mime: false
+        get_checksum: false
+        get_attributes: true
+      loop: "{{ ansible_facts['interfaces'] }}"
+      register: __stat
+
+    - name: interface | List interface results
+      ansible.builtin.debug:
+        var: __stat
+      tags: never
+
+    - name: interface | Select the first virtual function of the public interface
+      vars:
+        pciid: "{{ ansible_facts[deploy_edge_metal_public_interface]['pciid'] }}"
+        interface: "{{ __stat.results | select_vfs_from_stat_result(pciid) | sort | first | default(omit) }}"
+      ansible.builtin.set_fact:
+        __deploy_edge_metal_router_interface: "{{ interface }}"
+      when: interface != omit
