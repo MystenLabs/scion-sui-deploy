@@ -17,9 +17,6 @@
         timeout: 300
         sleep: 10
   roles:
-    - role: routing_to_host
-      routing_to_host_host_ip: "{{ host_ipv4 }}"
-
     - role: edge
       edge_isd_as: "{{ package_isd_as }}"
       edge_issuer_isd_as: "{{ package_issuer_isd_as }}"
@@ -45,3 +42,10 @@
             ipv4_gateway: "{{ network_config.gateway }}"
           addresses:
             - "{{ network_config.ipv4_cidr }}"
+            - "fd00:05c1:0400::2/126"
+            - "fd00:05c1:0400::2/126"
+            - "169.254.0.2/30"
+          routes:
+            - sequence_id: 1
+              to: "{{ host_ipv4 }}/32"
+              via: 169.254.0.1

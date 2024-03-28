@@ -14,6 +14,12 @@ argument_specs:
         type: str
         required: true
 
+      routing_to_edge_addresses:
+        description: Additional IPv4 and IPv6 addresses (CIDR) to add to the interface
+        type: list
+        elements: str
+        default: []
+
       routing_to_edge_bgp_asn:
         description: The (private) ASN to use for BGP on the node
         type: int

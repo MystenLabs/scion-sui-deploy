@@ -7,6 +7,9 @@ edge_bgp_asn: 65001
 edge_bgp_neighbor_address: ''
 edge_bgp_peer_asn: 65002
 edge_cert_local_path: files/tmp/{{ edge_isd_as | scion_ia_to_tag }}.pem
+edge_dns_servers:
+  - 8.8.8.8
+  - 1.1.1.1
 edge_extra_config: {}
 edge_force_replace_cert_key: false
 edge_key_local_path: files/tmp/{{ edge_isd_as | scion_ia_to_tag }}.key

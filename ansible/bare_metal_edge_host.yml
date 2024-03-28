@@ -15,4 +15,7 @@
 
     - role: routing_to_edge
       routing_to_edge_interface: "{{ public_interface }}"
-      routing_to_edge_edge_ipv4: "{{ hostvars[hosted_edge]['public_ipv4'] }}"
+      routing_to_edge_addresses:
+        - "fd00:05c1:0400::1/126"
+        - "169.254.0.1/30"
+      routing_to_edge_edge_ipv4: "169.254.0.2"

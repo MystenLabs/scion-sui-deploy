@@ -199,3 +199,9 @@ argument_specs:
             description: System configuration section to add to the config.
             type: dict
         default: {}
+
+      edge_dns_servers:
+        description: DNS server addresses to use
+        type: list
+        elements: str
+        default: [8.8.8.8, 1.1.1.1]

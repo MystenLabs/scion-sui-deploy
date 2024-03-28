@@ -3,5 +3,6 @@
 # from the argument specification at ansible/roles/routing_to_edge/meta/argument_specs.yml.
 # To update this file, run `poetry run generate_defaults` in the repository's root directory.
 
+routing_to_edge_addresses: []
 routing_to_edge_bgp_asn: 65002
 routing_to_edge_bgp_edge_asn: 65001

@@ -7,6 +7,9 @@ router bgp {{ routing_to_edge_bgp_asn }}
  no bgp ebgp-requires-policy
 !
 interface {{ routing_to_edge_interface }}
+{% for ip_cidr in routing_to_edge_addresses %}
+ {{ "ipv6" if ( ip_cidr | ansible.utils.ipv6 ) else "ip" }} address {{ ip_cidr }}
+{% endfor %}
 !
 ip prefix-list ANY permit 0.0.0.0/0 le 32
 route-map RM1 permit 10
