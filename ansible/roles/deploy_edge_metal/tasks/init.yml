@@ -1,5 +1,5 @@
 ---
-- name: Ensure ansible_facts used by role
+- name: init | Ensure ansible_facts used by role
   ansible.builtin.setup:
     gather_subset: interfaces
   when: not ansible_facts.keys() | list |
