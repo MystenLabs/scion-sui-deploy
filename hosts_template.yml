@@ -2,25 +2,58 @@
 # The bare-metal hosts that will be running both the Sui validator and hosting the EDGE VM.
 bare_metal_hosts:
   hosts:
-    mex-suival:
+    baremetal-suival:
 
 # The inventory hostname used to refer to the edge.
 edge_vms:
   hosts:
-    mex-edge:
+    edge:
 
 all:
   vars:
     # SSH authorized keys that are added to the EDGE VM. Requires at least 1.
     ssh_authorized_keys:
-      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK/ALpkZY66QR/uYrn4g9/GAjOM5cJ2lKbZrzzMhAg7X jean-pierre@mystenlabs.com"
+      - "{{ undef(hint='You must specify at least one SSH public key') }}"
 
-mexico:
+regionA:
+  hosts:
+    baremetal-suival:
+      # -- SSH options
+      ansible_host: "{{ undef(hint='You must specify the ansible host') }}"
+      ansible_user: "{{ undef(hint='You must specify the ansible username') }}"
+
+      # -- Configuration
+      # Public interface that will be shared with the EDGE VM
+      public_interface: "{{ undef(hint='You must specify an interface, e.g., eno1') }}"
+      # Public IPv4 address of the bare-metal host
+      public_ipv4: "{{ undef(hint='You must specify the public IPv4 of your Sui node') }}"
+      # The inventory hostname of the hosted EDGE
+      hosted_edge: edge
+
+    edge:
+      # -- SSH options
+      # Uses the bare-metal as a jump host to SSH into the hosted EDGE VM, does not need to be changed.
+      ansible_host: "{{ undef(hint='You must specify the ansible host') }}"
+      ansible_user: "{{ undef(hint='You must specify the ansible username') }}"
+      ansible_ssh_common_args: "-J {{ hostvars[vm_host]['ansible_user'] ~ '@' ~ hostvars[vm_host]['ansible_host'] }}"
+
+      # -- Configuration
+      # Inventory hostname of the bare-metal host associated with this EDGE VM
+      vm_host: baremetal-suival
+      # IP and gateway for the EDGE appliance.
+      network_config:
+        ipv4_cidr: "{{ undef(hint='Specify the public IP address and CIDR of the EDGE e.g., xxx.xxx.xxx.xxx/31') }}"
+        gateway: "{{ undef(hint='Specify the IP address of the network gateway') }}"
+
+      # Public IPv4 address to be configured on the EDGE.
+      # Defaults to the network address above without the CIDR range.
+      public_ipv4: "{{ network_config.ipv4_cidr | ansible.utils.ipaddr('address') }}"
+
   vars:
     # Directory in which secret values are stored on the controller
-    secrets_dir: "{{ playbook_dir }}/../mexico/secrets"
+    secrets_dir: "{{ undef(hint='You must specify a path to the generated secrets') }}"
     # Directory of the deployment package provided by Mysten Labs
-    deployment_package_path: "{{ playbook_dir }}/../mexico/deployment-package"
+    deployment_package_path: "{{ undef(hint='You must specify a path to the provided deployment package') }}"
 
     # Paths derived from the above
     deployment_package_config: "{{ deployment_package_path }}/config.yml"
@@ -29,35 +62,3 @@ mexico:
     scion_forwarding_key_path: "{{ secrets_dir }}/forwarding-key.key"
     scion_private_key_path: "{{ secrets_dir }}/scion-private-key.key"
 
-  hosts:
-    mex-suival:
-      # -- SSH options
-      ansible_host: 103.88.234.53
-      ansible_user: ubuntu
-
-      # -- Configuration
-      # Public interface that will be shared with the EDGE VM
-      public_interface: eno1
-      # Public IPv4 address of the bare-metal host
-      public_ipv4: "{{ ansible_host }}"
-      # The inventory hostname of the hosted EDGE
-      hosted_edge: mex-edge
-
-    mex-edge:
-      # -- SSH options
-      # Uses the bare-metal as a jump host to SSH into the hosted EDGE VM, does not need to be changed.
-      ansible_user: anapaya
-      ansible_host: 169.254.1.2
-      ansible_ssh_common_args: "-J {{ hostvars[vm_host]['ansible_user'] ~ '@' ~ hostvars[vm_host]['ansible_host'] }}"
-
-      # -- Configuration
-      # Inventory hostname of the bare-metal host associated with this EDGE VM
-      vm_host: mex-suival
-      # IP and gateway for the EDGE appliance.
-      network_config:
-        ipv4_cidr: 103.88.234.245/31
-        gateway: 103.88.234.244
-
-      # Public IPv4 address to be configured on the EDGE.
-      # Defaults to the network address above without the CIDR range.
-      public_ipv4: "{{ network_config.ipv4_cidr | ansible.utils.ipaddr('address') }}"
