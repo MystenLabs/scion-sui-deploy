@@ -11,7 +11,6 @@ packages = [{include = "filter_plugins", from = "ansible"}, {include = "scripts"
 python = "^3.11"
 ansible = "^9.3"
 pyyaml = "^6.0"
-libvirt-python = "^10.1.0"
 lxml = "^5.1.0"
 netaddr = "^1.2.1"
 

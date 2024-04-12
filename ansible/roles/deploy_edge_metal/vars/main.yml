@@ -2,7 +2,7 @@
 deploy_edge_metal_edge_url: "\
   https://dl.cloudsmith.io/{{ deploy_edge_metal_download.access_token }}/anapaya/stable/raw/names/\
   anapaya-appliance-base-bios-qcow2/versions/{{ deploy_edge_metal_download.version }}/\
-  anapaya-appliance-base-{{ deploy_edge_metal_download.version }}-bios-compressed.qcow2"
+  anapaya-appliance-base-bios-{{ deploy_edge_metal_download.version }}.qcow2"
 # Directory in which to store deployment files on the remote.
 deploy_edge_metal_scion_dir: /var/scion
 deploy_edge_metal_deployment_dir: "{{ deploy_edge_metal_scion_dir }}/deployment"
