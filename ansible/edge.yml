@@ -43,7 +43,6 @@
           addresses:
             - "{{ network_config.ipv4_cidr }}"
             - "fd00:05c1:0400::2/126"
-            - "fd00:05c1:0400::2/126"
             - "169.254.0.2/30"
           routes:
             - sequence_id: 1
