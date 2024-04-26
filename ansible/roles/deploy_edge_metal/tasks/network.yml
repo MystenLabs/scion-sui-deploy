@@ -9,9 +9,9 @@
         <description>A link local network between the host and the SCION Edge guest VM</description>
         <bridge name="virbr_scion" stp="on" macTableManager="libvirt"/>
         <mtu size="1500"/>
-        <ip family='ipv4' address='169.254.1.1' prefix='24'>
+        <ip family='ipv4' address='192.168.18.1' prefix='24'>
           <dhcp>
-            <range start='169.254.1.2' end='169.254.1.2'/>
+            <range start='192.168.18.2' end='192.168.18.2'/>
           </dhcp>
         </ip>
         <dns enable='no'/>
