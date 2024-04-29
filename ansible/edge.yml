@@ -35,7 +35,7 @@
         - name: enp1s0
           driver: LINUX
           addresses:
-            - 169.254.1.2/24
+            - 192.168.18.2/24
         - name: enp5s0
           driver: VPP_DPDK
           gateway:
@@ -43,8 +43,8 @@
           addresses:
             - "{{ network_config.ipv4_cidr }}"
             - "fd00:05c1:0400::2/126"
-            - "169.254.0.2/30"
+            - "192.168.17.2/30"
           routes:
             - sequence_id: 1
               to: "{{ host_ipv4 }}/32"
-              via: 169.254.0.1
+              via: 192.168.17.1
