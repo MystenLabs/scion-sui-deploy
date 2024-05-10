@@ -34,7 +34,7 @@ regionA:
       # -- SSH options
       # Uses the bare-metal as a jump host to SSH into the hosted EDGE VM, does not need to be changed.
       ansible_user: anapaya
-      ansible_host: 169.254.1.2
+      ansible_host: 192.168.18.2
       ansible_ssh_common_args: "-J {{ hostvars[vm_host]['ansible_user'] ~ '@' ~ hostvars[vm_host]['ansible_host'] }}"
 
       # -- Configuration
@@ -48,8 +48,12 @@ regionA:
       # Public IPv4 address to be configured on the EDGE.
       # Defaults to the network address above without the CIDR range.
       public_ipv4: "{{ network_config.ipv4_cidr | ansible.utils.ipaddr('address') }}"
-
+      
   vars:
+    dns:
+      - address: 1.1.1.1
+      - address: 8.8.8.8
+    
     # Directory in which secret values are stored on the controller
     secrets_dir: "{{ undef(hint='You must specify a path to the generated secrets') }}"
     # Directory of the deployment package provided by Mysten Labs

@@ -1,8 +1,30 @@
+#jinja2: trim_blocks:False
 {
     "config": {
+        "system": {
+            "dns": {
+                "servers": [
+                {% for server in dns %}
+                    {{- server | to_json }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+                ]
+            }
+        },
         "management": {
             "telemetry": {
-                "address": "127.0.0.1:42001"
+            {% if metrics_labels %}
+                "address": "192.168.18.2:42001",
+                "labels": [
+                {%for key,value in metrics_labels.items() %}
+                    {{- "{" }}
+                    "label": "{{ key }}",
+                    "value": "{{ value }}"
+                    {{ "}" }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+                ]
+            {% else %}
+                "address": "192.168.18.2:42001"
+            {% endif %}
             },
             "api": {
                 "listeners": [
