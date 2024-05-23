@@ -25,6 +25,13 @@
             {% else %}
                 "address": "192.168.18.2:42001"
             {% endif %}
+            {% if logging_url %}
+                "logging": {
+                "loki": {
+                    "url": { logging_url }
+                    }
+                }
+            {% end %}
             },
             "api": {
                 "listeners": [
