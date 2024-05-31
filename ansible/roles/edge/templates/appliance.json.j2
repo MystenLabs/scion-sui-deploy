@@ -11,6 +11,9 @@
             }
         },
         "management": {
+            {% if appliance_hostname %}
+            "hostname": "{{ appliance_hostname }}",
+            {% endif %}
             "telemetry": {
             {% if metrics_labels %}
                 "address": "192.168.18.2:42001",
@@ -21,17 +24,18 @@
                     "value": "{{ value }}"
                     {{ "}" }}{% if not loop.last %},{% endif %}
                 {% endfor %}
-                ]
+                ],
             {% else %}
                 "address": "192.168.18.2:42001"
             {% endif %}
             {% if logging_url %}
                 "logging": {
-                "loki": {
-                    "url": { logging_url }
+                  "logging_type": "LOKI",
+                  "loki": {
+                    "url": "{{ logging_url }}"
                     }
-                }
-            {% end %}
+                 },
+            {% endif %}
             },
             "api": {
                 "listeners": [
