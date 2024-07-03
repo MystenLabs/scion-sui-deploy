@@ -15,6 +15,14 @@
             "hostname": "{{ appliance_hostname }}",
             {% endif %}
             "telemetry": {
+            {% if logging_url %}
+                "logging": {
+                  "logging_type": "LOKI",
+                  "loki": {
+                    "url": "{{ logging_url }}"
+                    }
+                 },
+            {% endif %}
             {% if metrics_labels %}
                 "address": "192.168.18.2:42001",
                 "labels": [
@@ -27,14 +35,6 @@
                 ],
             {% else %}
                 "address": "192.168.18.2:42001"
-            {% endif %}
-            {% if logging_url %}
-                "logging": {
-                  "logging_type": "LOKI",
-                  "loki": {
-                    "url": "{{ logging_url }}"
-                    }
-                 },
             {% endif %}
             },
             "api": {
