@@ -14,5 +14,6 @@ interface {{ routing_to_edge_interface }}
 ip prefix-list ANY permit 0.0.0.0/0 le 32
 route-map RM1 permit 10
   match ip address prefix-list ANY
+  set src {{ public_ipv4 }}
 
 ip protocol bgp route-map RM1
