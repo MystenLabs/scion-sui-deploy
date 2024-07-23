@@ -4,7 +4,9 @@
         "system": {
             "dns": {
                 "servers": [
-                    {{- servers | to_json }}
+                {% for server in dns %}
+                    {{- server | to_json }}{% if not loop.last %},{% endif %}
+                {% endfor %}
                 ]
             }
         },
@@ -13,7 +15,7 @@
             "hostname": "{{ appliance_hostname }}",
             {% endif %}
             "telemetry": {
-            {% if logging_url %}
+            {% if logging_url is defined %}
                 "logging": {
                   "logging_type": "LOKI",
                   "loki": {
@@ -176,7 +178,7 @@
                     "enabled": true,
                     "neighbor_address": "{{ edge_bgp_neighbor_address }}",
                     "peer_as": {{ edge_bgp_peer_asn }},
-                    {% if ebg_multihop is defined and ebgp_multihop | int == ebgp_multihop %}
+                    {% if ebgp_multihop is defined %}
                     "ebgp_multihop": {{ ebgp_multihop }},
                     {% endif %}
                     "timers": {
