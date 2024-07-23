@@ -1,8 +1,41 @@
+#jinja2: trim_blocks:False
 {
     "config": {
+        "system": {
+            "dns": {
+                "servers": [
+                {% for server in dns %}
+                    {{- server | to_json }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+                ]
+            }
+        },
         "management": {
+            {% if appliance_hostname is defined %}
+            "hostname": "{{ appliance_hostname }}",
+            {% endif %}
             "telemetry": {
-                "address": "127.0.0.1:42001"
+            {% if logging_url is defined %}
+                "logging": {
+                  "logging_type": "LOKI",
+                  "loki": {
+                    "url": "{{ logging_url }}"
+                    }
+                 },
+            {% endif %}
+            {% if metrics_labels is defined %}
+                "address": "192.168.18.2:42001",
+                "labels": [
+                {%for key,value in metrics_labels.items() %}
+                    {{- "{" }}
+                    "label": "{{ key }}",
+                    "value": "{{ value }}"
+                    {{ "}" }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+                ],
+            {% else %}
+                "address": "192.168.18.2:42001"
+            {% endif %}
             },
             "api": {
                 "listeners": [
@@ -145,6 +178,9 @@
                     "enabled": true,
                     "neighbor_address": "{{ edge_bgp_neighbor_address }}",
                     "peer_as": {{ edge_bgp_peer_asn }},
+                    {% if ebgp_multihop is defined %}
+                    "ebgp_multihop": {{ ebgp_multihop }},
+                    {% endif %}
                     "timers": {
                         "hold_time": 3,
                         "keepalive_interval": 1,
