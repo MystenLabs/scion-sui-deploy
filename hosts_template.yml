@@ -51,9 +51,12 @@ regionA:
       
   vars:
     dns:
-      - address: 1.1.1.1
-      - address: 8.8.8.8
-    
+      - address: 9.9.9.9
+      - address: 149.112.112.112
+    metrics_labels:
+      product: "edge"
+    appliance_hostname: "anapaya-edge"
+    # ebgp_multihop: 2 # if the bare metal host and edge appliance have IP's on different subnets, you will want to uncomment this.
     # Directory in which secret values are stored on the controller
     secrets_dir: "{{ undef(hint='You must specify a path to the generated secrets') }}"
     # Directory of the deployment package provided by Mysten Labs

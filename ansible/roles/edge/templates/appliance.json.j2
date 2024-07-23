@@ -4,14 +4,12 @@
         "system": {
             "dns": {
                 "servers": [
-                {% for server in dns %}
-                    {{- server | to_json }}{% if not loop.last %},{% endif %}
-                {% endfor %}
+                    {{- servers | to_json }}
                 ]
             }
         },
         "management": {
-            {% if appliance_hostname %}
+            {% if appliance_hostname is defined %}
             "hostname": "{{ appliance_hostname }}",
             {% endif %}
             "telemetry": {
@@ -23,7 +21,7 @@
                     }
                  },
             {% endif %}
-            {% if metrics_labels %}
+            {% if metrics_labels is defined %}
                 "address": "192.168.18.2:42001",
                 "labels": [
                 {%for key,value in metrics_labels.items() %}
@@ -178,6 +176,9 @@
                     "enabled": true,
                     "neighbor_address": "{{ edge_bgp_neighbor_address }}",
                     "peer_as": {{ edge_bgp_peer_asn }},
+                    {% if ebg_multihop is defined and ebgp_multihop | int == ebgp_multihop %}
+                    "ebgp_multihop": {{ ebgp_multihop }},
+                    {% endif %}
                     "timers": {
                         "hold_time": 3,
                         "keepalive_interval": 1,
