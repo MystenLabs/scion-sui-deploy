@@ -1,0 +1,7 @@
+---
+- name: Render template to file
+  template:
+    src: templates/appliance.json.j2
+    dest: /tmp/edge_config.txt
+  tags: render
+

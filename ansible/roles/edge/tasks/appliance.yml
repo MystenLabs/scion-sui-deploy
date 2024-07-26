@@ -6,6 +6,8 @@
     owner: anapaya
     group: users
     mode: "0700"
+  tags:
+  - config
 
 - name: Copy configuration files for appliance-cli
   ansible.builtin.copy:
@@ -17,8 +19,11 @@
   loop:
     - "{{ edge_cli_config_file }}"
     - "{{ edge_cli_context_file }}"
+  tags:
+  - config
 
 - name: Configure appliance
+  tags: config
   module_defaults:
     ansible.builtin.uri:
       force_basic_auth: true
@@ -42,6 +47,7 @@
       changed_when: _this.json != edge_appliance_config.json
 
     - name: Add TRCs
+      tags: trcs
       ansible.builtin.uri:
         url: https://127.0.0.1/api/v1/cppki/trcs/bundle
         method: POST
@@ -55,6 +61,9 @@
       changed_when: _this is not failed
 
 - name: Copy control-plane key and certificate files if they exist locally
+  tags: 
+  - config
+  - keys
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ edge_scion_cert_key_filename_without_suffix }}.{{ item.suffix }}"
