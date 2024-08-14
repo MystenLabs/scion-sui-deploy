@@ -1,5 +1,13 @@
 ---
-#- name: Initialize system
-#  ansible.builtin.import_tasks: init.yml
+- name: Initialize system
+  ansible.builtin.import_tasks: init.yml
+  tags:
+  - init
 - name: Configure appliance
   ansible.builtin.import_tasks: appliance.yml
+  tags:
+  - config
+- name: Render appliance config locally
+  ansible.builtin.import_tasks: render_template.yml
+  tags:
+  - render

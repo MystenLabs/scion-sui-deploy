@@ -1,5 +1,4 @@
 ---
-
 - name: Ensure frr is installed
   ansible.builtin.apt:
     name: frr
