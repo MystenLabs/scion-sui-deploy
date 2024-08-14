@@ -11,6 +11,21 @@
             }
         },
         "management": {
+            "ssh": {
+                "users": [
+                    {
+                        "username": "anapaya",
+                        "ssh_keys": [
+                        {% for key in ssh_edge_authorized_keys %}
+                            {
+                                "key": {{ key | to_json }},
+                                "description": "key{{ loop.index }}"
+                            }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                        ]
+                    }
+                ]
+            },
             {% if appliance_hostname is defined %}
             "hostname": "{{ appliance_hostname }}",
             {% endif %}
@@ -52,7 +67,7 @@
                             "password_hashed": "$2a$10$W7LRMh1MAA7ptvA335U3g.WXMaCb.EHjUCKILXUkjKdm9lJV/0FBC"
                         }
                     ]
-                }
+                },
             }
         },
         "interfaces": {
@@ -144,6 +159,10 @@
             ],
             "static_announcements": [
                 {
+                    "next_hop_tracking": {
+                        "disabled": false,
+                        "target": "192.168.17.1"
+                    },
                     "prefixes": {{
                         (edge_advertised_ranges | items2dict(key_name='isd_as', value_name='cidr_ranges'))[edge_isd_as]
                         | to_nice_json }},

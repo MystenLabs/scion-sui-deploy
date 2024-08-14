@@ -9,7 +9,7 @@ anapaya_edge:
 # URL from which to download the EDGE image.
 anapaya_edge_url: "https://dl.cloudsmith.io/{{ package_edge_download.access_token }}/anapaya/stable/raw/names/\
                    anapaya-appliance-base-bios-qcow2/versions/{{ anapaya_edge.version }}/\
-                   anapaya-appliance-base-{{ anapaya_edge.version }}-bios-compressed.qcow2"
+                   anapaya-appliance-base-{{ anapaya_edge.version }}-bios.qcow2"
 # Directory in which to store deployment files on the remote.
 scion_dir: /var/scion
 deployment_dir: "{{ scion_dir }}/deployment"
