@@ -82,3 +82,8 @@
   become: true
   when: lookup("ansible.builtin.file", item.src, errors="ignore")
   no_log: "{{ not (item.log | default(true)) }}"
+
+- name: Unlock user anapaya
+  ansible.builtin.command:
+    cmd: passwd -u anapaya
+  become: true
