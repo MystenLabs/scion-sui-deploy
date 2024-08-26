@@ -64,7 +64,7 @@ files = [
     {file = "ansible-lint-24.2.1.tar.gz", hash = "sha256:c3619deaadf852c353decff7242589bd1339e29271552e4e37bfa8f67db4c56b"},
     {file = "ansible_lint-24.2.1-py3-none-any.whl", hash = "sha256:d9e11aa06429610f0b461ec5eb9adf7317d4b2abb78475a9a1ec7e8f8e2c1316"},
 ]
-
+#
 [package.dependencies]
 ansible-compat = ">=4.1.11"
 ansible-core = ">=2.12.0"
