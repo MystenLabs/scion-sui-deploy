@@ -1,5 +1,5 @@
 # CODEOWNERS owners
-/.github/CODEOWNERS @MystenLabs/mysten-pe @jpcsmith @mlegner
+/.github/CODEOWNERS @MystenLabs/mysten-pe
 
 # Global repo - Mysten maintainers
 * @jpcsmith @mlegner
