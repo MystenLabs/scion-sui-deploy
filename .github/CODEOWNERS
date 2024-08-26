@@ -1,3 +1,6 @@
-# Mysten maintainers
+# CODEOWNERS owners
+/.github/CODEOWNERS @MystenLabs/mysten-pe @jpcsmith @mlegner
+
+# Global repo - Mysten maintainers
 * @MystenLabs/mysten-pe @jpcsmith @mlegner
 
