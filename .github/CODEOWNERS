@@ -2,5 +2,5 @@
 /.github/CODEOWNERS @MystenLabs/mysten-pe
 
 # Global repo - Mysten maintainers
-* @jpcsmith @mlegner
+* @jpcsmith @mlegner @chris-gorham @suiwombat
 
