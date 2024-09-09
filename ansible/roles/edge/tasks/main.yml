@@ -11,3 +11,7 @@
   ansible.builtin.import_tasks: render_template.yml
   tags:
   - render
+- name: Configure Grafana Agent
+  ansible.builtin.import_tasks: grafana-agent.yml
+  tags:
+  - metrics

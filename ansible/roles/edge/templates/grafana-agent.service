@@ -1,0 +1,21 @@
+[Unit]
+Description=Grafana Agent Docker Container
+Requires=docker.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStart=/usr/bin/docker run --rm \
+  --name grafana-agent \
+  --network host \
+  -v /etc/grafana/agent-config.yaml:/etc/grafana/agent-config.yaml \
+  grafana/agent:v0.42.0 \
+  --config.file=/etc/grafana/agent-config.yaml
+ExecStartPre=-/usr/bin/docker stop grafana-agent
+ExecStartPre=-/usr/bin/docker rm grafana-agent
+ExecStartPre=/usr/bin/docker pull grafana/agent:v0.42.0
+ExecStop=/usr/bin/docker stop grafana-agent
+
+[Install]
+WantedBy=multi-user.target

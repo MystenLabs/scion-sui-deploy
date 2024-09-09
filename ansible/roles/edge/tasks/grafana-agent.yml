@@ -1,0 +1,27 @@
+tasks:
+  - name: Copy systemd service file
+    copy:
+      src: {{ grafana_agent_systemd_path }}
+      dest: /etc/systemd/system/grafana-agent.service
+
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Copy configuration file
+    copy:
+      src: {{ grafana_agent_config_path }}
+      dest: /etc/grafana/agent-config.yaml
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Reload systemd daemon
+    systemd:
+      daemon_reload: yes
+
+  - name: Enable and start the new service
+    systemd:
+      name: "grafana-agent"
+      enabled: yes
+      state: started
