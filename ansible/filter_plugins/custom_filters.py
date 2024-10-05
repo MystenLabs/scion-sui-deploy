@@ -66,9 +66,8 @@ def customize_cloud_config(config: str, ssh_authorized_keys: list[str]) -> str:
     assert anapaya_user is not None, "expected the 'anapaya' user in the cloud config"
 
     anapaya_user["ssh_authorized_keys"] = ssh_authorized_keys
-    anapaya_user["lock_passwd"] = True
+    anapaya_user["lock_passwd"] = False
     anapaya_user["sudo"] = "ALL=(ALL) NOPASSWD:ALL"
-    del anapaya_user["plain_text_passwd"]
 
     userdata["runcmd"].append("touch /home/anapaya/.setup_complete")
     userdata["ssh_pwauth"] = False
