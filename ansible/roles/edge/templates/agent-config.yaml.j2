@@ -7,6 +7,7 @@ metrics:
     scrape_interval: 60s
     external_labels:
       role: scion-validator
+      host: {{ appliance_hostname }}
   configs:
   - name: scion_edge
     scrape_configs:
