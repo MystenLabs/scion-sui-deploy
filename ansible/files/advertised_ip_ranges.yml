@@ -14,4 +14,7 @@
 # Mysten-6 lhr host primary nic
  - isd_as: 65-2:0:5a
    cidr_ranges:
-     - 209.250.224.204/32 
+     - 209.250.224.204/32
+ - isd_as: 66-2:0:7e
+   cidr_ranges:
+     - 45.250.255.116/32
