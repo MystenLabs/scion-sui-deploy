@@ -1,0 +1,26 @@
+---
+server:
+  log_level: info
+
+metrics:
+  global:
+    scrape_interval: 60s
+    external_labels:
+      role: scion-validator
+      host: {{ appliance_hostname }}
+  configs:
+  - name: scion_edge
+    scrape_configs:
+      - job_name: scion_appliance
+        static_configs:
+        - targets: ['192.168.18.2:42001']
+
+    remote_write:
+      - url: {{ metrics_url }}
+        basic_auth:
+          username: {{ metrics_username }}
+          password: {{ metrics_password }}
+        tls_config:
+          insecure_skip_verify: true
+        headers:
+          X-Scope-OrgID: anonymous

@@ -9,5 +9,10 @@
   - config
 - name: Render appliance config locally
   ansible.builtin.import_tasks: render_template.yml
+  when: "'render' in ansible_run_tags"
   tags:
   - render
+- name: Configure Grafana Agent
+  ansible.builtin.import_tasks: grafana-agent.yml
+  tags:
+  - metrics

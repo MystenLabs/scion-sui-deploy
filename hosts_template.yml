@@ -69,3 +69,4 @@ regionA:
     scion_forwarding_key_path: "{{ secrets_dir }}/forwarding-key.key"
     scion_private_key_path: "{{ secrets_dir }}/scion-private-key.key"
 
+
