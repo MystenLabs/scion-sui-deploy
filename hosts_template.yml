@@ -68,7 +68,5 @@ regionA:
     scion_certificate_path: "{{ deployment_package_path }}/scion-cert.pem"
     scion_forwarding_key_path: "{{ secrets_dir }}/forwarding-key.key"
     scion_private_key_path: "{{ secrets_dir }}/scion-private-key.key"
-    grafana_agent_systemd_path: "{{ deployment_package_path }}/grafana-agent-systemd.yml"
-    grafana_agent_config_path: "{{ deployment_package_path }}/grafana-agent-config.yml"
 
 
