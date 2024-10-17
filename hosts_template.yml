@@ -63,7 +63,7 @@ regionA:
     # Directory in which secret values are stored on the controller
     secrets_dir: "{{ undef(hint='You must specify a path to the generated secrets, e.g., /home/ubuntu/secrets') }}"
     # Directory of the deployment package provided by Mysten Labs
-    deployment_package_path: "{{ undef(hint='You must specify a path to the provided deployment package, e.g., /home/ubuntu/') }}"
+    deployment_package_path: "{{ undef(hint='You must specify a path to the provided deployment package, e.g., /home/ubuntu/deployment_package.qcow') }}"
 
     # Paths derived from the above
     deployment_package_config: "{{ deployment_package_path }}/config.yml"
