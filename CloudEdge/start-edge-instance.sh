@@ -49,3 +49,10 @@ incus exec $EDGE_NAME -- rm /etc/netplan/00-installer-config.yaml
 incus file push $NETPLAN_CONFIG $EDGE_NAME/etc/netplan/10-scionsui.yaml --mode 600
 rm $NETPLAN_CONFIG
 incus exec $EDGE_NAME -- netplan apply
+
+# configure the appliance as an Edge
+incus exec $EDGE_NAME -- mkdir /home/anapaya/.appliance-cli
+incus file push appliances.json $EDGE_NAME/home/anapaya/.appliance-cli/appliances.json
+incus file push context.json $EDGE_NAME/home/anapaya/.appliance-cli/context.json
+incus file push edge-config.json $EDGE_NAME/home/anapaya/edge-config.json
+
