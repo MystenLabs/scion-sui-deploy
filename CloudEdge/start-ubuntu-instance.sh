@@ -36,4 +36,4 @@ incus exec $INSTANCE_NAME -- rm /etc/netplan/10-lxc.yaml
 incus file push $NETPLAN_CONFIG $INSTANCE_NAME/etc/netplan/10-scionsui.yaml --mode 600
 rm $NETPLAN_CONFIG
 incus exec $INSTANCE_NAME -- netplan apply
-incus exec $INSTANC_NAME -- apt install apache -y
+incus exec $INSTANCE_NAME -- apt install apache2 -y
