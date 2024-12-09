@@ -1,5 +1,6 @@
 # starts a generic Ubuntu instance for use as a generic end point for SCION testing
 # instance will be connected to the scionwan network for SCION connectivity via the Edge
+# instance will be connected to the virbr0 network for private connectivity to the host and NAT'd Internet connectivity
 
 INSTANCE_NAME=ubuntu
 
