@@ -11,6 +11,9 @@
 # notes:
 #  after install, it takes a few minutes for the appliance to come online as it does updates
 #  the web GUI and the appliance-cli tool will not be available until this completes
+#
+# instance will be connected to the scionwan network for SCION connectivity via the Edge
+# instance will be connected to the virbr0 network for private connectivity to the host and NAT'd Internet connectivity
 EDGE_NAME=edge01
 
 incus init edge $EDGE_NAME \
