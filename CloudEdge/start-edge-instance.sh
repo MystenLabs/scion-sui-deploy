@@ -52,7 +52,7 @@ incus exec $EDGE_NAME -- netplan apply
 
 # configure the appliance as an Edge
 incus exec $EDGE_NAME -- mkdir /home/anapaya/.appliance-cli
-incus file push appliances.json $EDGE_NAME/home/anapaya/.appliance-cli/appliances.json
-incus file push context.json $EDGE_NAME/home/anapaya/.appliance-cli/context.json
-incus file push edge-config.json $EDGE_NAME/home/anapaya/edge-config.json
+#incus file push appliances.json $EDGE_NAME/home/anapaya/.appliance-cli/appliances.json
+#incus file push context.json $EDGE_NAME/home/anapaya/.appliance-cli/context.json
+#incus file push edge-config.json $EDGE_NAME/home/anapaya/edge-config.json
 
