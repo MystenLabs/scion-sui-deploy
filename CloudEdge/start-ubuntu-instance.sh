@@ -1,3 +1,5 @@
+# starts a generic Ubuntu instance for use as a generic end point for SCION testing
+
 INSTANCE_NAME=ubuntu
 
 incus init images:ubuntu/24.04 $INSTANCE_NAME \
