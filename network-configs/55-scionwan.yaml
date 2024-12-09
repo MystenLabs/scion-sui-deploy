@@ -1,0 +1,21 @@
+network:
+    bridges:
+      scionwan:
+        dhcp4: no
+        interfaces: [eno1]
+        addresses:
+          - 69.67.151.95/31
+          - 2605:6440:4001:15::2/64
+        routes:
+          - to: default
+            via: 69.67.151.94
+            metric: 200
+          - to: default
+            via: 2605:6440:4001:15::1
+        nameservers:
+          addresses:
+          - 8.8.8.8
+          - 1.1.1.1
+          - 2001:4860:4860::8888
+          - 2606:4700:4700::1111
+    version: 2
