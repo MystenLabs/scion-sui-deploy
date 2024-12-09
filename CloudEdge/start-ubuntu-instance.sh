@@ -1,4 +1,5 @@
 # starts a generic Ubuntu instance for use as a generic end point for SCION testing
+# instance will be connected to the scionwan network for SCION connectivity via the Edge
 
 INSTANCE_NAME=ubuntu
 
