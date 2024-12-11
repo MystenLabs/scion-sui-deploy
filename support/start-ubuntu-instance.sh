@@ -2,6 +2,22 @@
 # instance will be connected to the scionwan network for SCION connectivity via the Edge
 # instance will be connected to the virbr0 network for private connectivity to the host and NAT'd Internet connectivity
 
+#IPV6_ADDRESS="2605:6440:a002:44::4/64"
+#IPV6_GATEWAY="2605:6440:a002:44::1/64"
+
+if [ -z "${IPV6_ADDRESS}" ] ; then
+        echo "set IPV6_ADDRESS before proceeding"
+        exit -1
+fi
+
+
+if [ -z "${IPV6_GATEWAY}" ] ; then
+        echo "set IPV6_GATEWAY before proceeding"
+        exit -1
+fi
+
+
+
 INSTANCE_NAME=ubuntu
 
 incus init images:ubuntu/24.04 $INSTANCE_NAME \
@@ -24,10 +40,10 @@ network:
       dhcp4: true
     enp6s0:
       addresses:
-      - 2605:6440:8002:11::4/64
+      -  ${IPV6_ADDRESS}
       routes:
       - to: default
-        via: 2605:6440:8002:11::1
+        via: ${IPV6_GATEWAY}
       nameservers:
         addresses:
         - 8.8.8.8
