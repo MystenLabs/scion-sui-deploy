@@ -16,6 +16,7 @@ network:
     bridges:
       scionwan:
         dhcp4: no
+        dhcp6: no
         interfaces: [eno1]
         addresses:
           - 10.0.0.2/31
