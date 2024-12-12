@@ -18,7 +18,7 @@ mv /etc/netplan/50-cloud-init.yaml /etc/netplan/50-scionsui.yaml
 
 echo "Please update /etc/netplan/50-scionsui.yaml to create scionwan"
 
-apt install incus
+apt install incus -y
 adduser studarus incus-admin
 newgrp incus-admin
 incus admin init --minimal
