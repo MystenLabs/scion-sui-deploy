@@ -18,16 +18,14 @@ mv /etc/netplan/50-cloud-init.yaml /etc/netplan/50-scionsui.yaml
 
 echo "Please update /etc/netplan/50-scionsui.yaml to create scionwan"
 
-apt install incus -y
+apt install incus qemu-utils qemu-system-x86 -y
 adduser studarus incus-admin
+
+# non root from here down
 newgrp incus-admin
 incus admin init --minimal
 
 incus network create virbr0
-
-apt install qemu-utils qemu-system-x86
-incus admin shutdown
-incus admin waitready
 
 ls -l appliance-uefi.qcow2
 
