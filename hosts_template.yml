@@ -29,6 +29,7 @@ regionA:
       public_interface: "{{ undef(hint='You must specify an interface, e.g., eno1') }}"
       # Public IPv4 address of the Sui Full Node/Valdator 
       public_ipv4: "{{ undef(hint='You must specify the public IPv4 of your Sui node, e.g. xxx.xxx.xxx.xxx') }}"
+      public_ipv4_gateway: "{{ undef(hint='You must specify the public IPv4 gatewayof your Sui node, e.g. xxx.xxx.xxx.xxx') }}"
       # The inventory hostname of the hosted EDGE
       hosted_edge: edge
 

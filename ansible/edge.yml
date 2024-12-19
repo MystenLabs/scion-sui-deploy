@@ -32,19 +32,18 @@
       edge_advertised_ranges: >-
         {{ lookup('ansible.builtin.file', 'files/advertised_ip_ranges.yml') | from_yaml }}
       edge_ethernets:
-        - name: enp1s0
+        - name: "{{ network_config.mgmt_if_name | default('enp1s0')}}"
           driver: LINUX
           addresses:
             - 192.168.18.2/24
-        - name: enp5s0
+        - name: "{{ network_config.if_name | default('enp5s0')}}"
           driver: VPP_DPDK
           gateway:
             ipv4_gateway: "{{ network_config.gateway }}"
           addresses:
             - "{{ network_config.ipv4_cidr }}"
             - "fd00:05c1:0400::2/126"
+        - name: "{{ network_config.bgp_if_name | default('enp6s0')}}"
+          driver: VPP_DPDK
+          addresses:
             - "192.168.17.2/30"
-          routes:
-            - sequence_id: 1
-              to: "{{ host_ipv4 }}/32"
-              via: 192.168.17.1

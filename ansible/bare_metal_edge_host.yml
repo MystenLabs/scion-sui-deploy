@@ -14,7 +14,7 @@
       deploy_edge_metal_download: "{{ package_edge_download }}"
 
     - role: routing_to_edge
-      routing_to_edge_interface: "{{ public_interface }}"
+      routing_to_edge_interface: "{{ bgp_if_name | default(public_interface) }}"
       routing_to_edge_addresses:
         - "fd00:05c1:0400::1/126"
         - "192.168.17.1/30"

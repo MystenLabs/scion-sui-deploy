@@ -31,3 +31,6 @@ __deploy_edge_metal_internal_network_name: scion_internal
 __deploy_edge_metal_vm_name: anapaya-edge
 __deploy_edge_metal_vm_memory_mib: 2048
 __deploy_edge_metal_vm_vcpus: 2
+__deploy_edge_metal_virt_type: "{{ deploy_edge_metal_virt_type | default('sriov') }}"
+__deploy_edge_metal_bgp_bridge: "{{ deploy_edge_metal_bgp_bridge | default(false) }}"
+__deploy_edge_metal_bgp_network_name: scion_bgp
