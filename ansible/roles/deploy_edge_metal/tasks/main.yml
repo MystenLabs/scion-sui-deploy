@@ -22,14 +22,22 @@
   ansible.builtin.meta: flush_handlers
 
 - name: Kick-off the VM installation and immediately continue
-  vars:
-    pciid: "{{ ansible_facts[__deploy_edge_metal_router_interface].pciid }}"
-    host_device: "{{ 'pci_' ~ (pciid | replace('.', '_') | replace (':', '_')) }}"
   ansible.builtin.command: >-
     virt-install --name {{ __deploy_edge_metal_vm_name }} --virt-type kvm
     --memory {{ __deploy_edge_metal_vm_memory_mib }} --vcpus {{ __deploy_edge_metal_vm_vcpus }} --cpu host
     --boot hd --disk vol={{ __deploy_edge_metal_storage_pool_name }}/{{ __deploy_edge_metal_volume_name }}
-    --os-variant ubuntu24.04 --graphics none --network bridge=scionwan --import
-    --noautoconsole
+    --os-variant ubuntu24.04 --graphics none 
+    {% if __deploy_edge_metal_router_interface is defined %}
+    --hostdev {{ host_device }}
+    {% else %}
+    --network bridge=scionwan
+    {% endif %}
+    --network network={{ __deploy_edge_metal_internal_network_name }}
+    {% if __deploy_edge_metal_bgp_bridge %}
+    --network network={{ __deploy_edge_metal_bgp_network_name }}
+    {% endif %}
+    --import --noautoconsole
+  vars:
+    pciid: "{{ ansible_facts[__deploy_edge_metal_router_interface].pciid | default('') }}"
+    host_device: "{{ 'pci_' ~ (pciid | replace('.', '_') | replace (':', '_')) }}"
   changed_when: true
-  when: __deploy_edge_metal_router_interface is defined

@@ -1,44 +1,29 @@
----
 - name: Ensure bridge interface exists
   ansible.builtin.command: ip link add name scionwan type bridge
-  ignore_errors: true  # In case bridge already exists
+  ignore_errors: true
+  become: true
 
 - name: Bring up bridge interface
   ansible.builtin.command: ip link set scionwan up
-  
-- name: Add IP to bridge interface
-  ansible.builtin.command: ip addr add {{ public_ipv4 }} dev scionwan
-  ignore_errors: true  # In case IP already exists
+  become: true
 
-- name: Attach physical interface to bridge
-  ansible.builtin.command: ip link set {{ public_interface }} master scionwan
+- name: Copy bridge script template to remote server
+  ansible.builtin.template:
+    src: bridge_toggle.sh.j2
+    dest: /usr/local/sbin/bridge_toggle.sh
+    mode: '0755'
+  become: true
 
-- name: Bring up physical interface
-  ansible.builtin.command: ip link set {{ public_interface }} up
-
-- name: Update default route to use bridge
-  block:
-    - name: Remove old default route
-      ansible.builtin.command: ip route del default via {{ public_ipv4_gateway }} dev {{ public_interface }}
-      ignore_errors: true  # In case route doesn't exist
-
-    - name: Add new default route via bridge
-      ansible.builtin.command: ip route add default via {{ public_ipv4_gateway }} dev scionwan
-  rescue:
-    # If route change fails, we need to ensure connectivity isn't lost
-    - name: Restore original route if new route fails
-      ansible.builtin.command: ip route add default via {{ public_ipv4_gateway }} dev {{ public_interface }}
-
-- name: Remove IP from physical interface
-  ansible.builtin.command: ip addr del {{ public_ipv4 }} dev {{ public_interface }}
-  ignore_errors: true  # In case IP was already removed
+- name: Execute bridge attach
+  ansible.builtin.command: /usr/local/sbin/bridge_toggle.sh attach
+  become: true
 
 - name: Check for netplan configuration files
   ansible.builtin.find:
     paths: /etc/netplan
     patterns: "*.yaml"
   register: netplan_files
-
+  become: true
 - name: Backup and modify netplan configs if they exist
   when: netplan_files.matched > 0
   block:
@@ -48,3 +33,4 @@
           network: {config: disabled}
         dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
         mode: '0644'
+      become: true
