@@ -7,7 +7,7 @@ router bgp {{ routing_to_edge_bgp_asn }}
  neighbor {{ routing_to_edge_edge_ipv4 }} route-map SET_NEXTHOP in
  no bgp ebgp-requires-policy
 !
-interface {{ routing_to_edge_interface }}
+interface scion_bgp
 {% for ip_cidr in routing_to_edge_addresses %}
  {{ "ipv6" if ( ip_cidr | ansible.utils.ipv6 ) else "ip" }} address {{ ip_cidr }}
 {% endfor %}
