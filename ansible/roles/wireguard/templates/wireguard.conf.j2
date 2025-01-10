@@ -1,0 +1,10 @@
+[Interface]
+Address = {{ wireguard_allowed_ips }}
+PrivateKey = {{ generated_wireguard_private_key | default(wireguard_private_key) }}
+ListenPort = 51820
+
+[Peer]
+PublicKey = {{ generated_wireguard_public_key | default(wireguard_public_key) }}
+AllowedIPs = {{ wireguard_allowed_ips }}
+Endpoint = {{ wireguard_endpoint }}
+PersistentKeepalive = {{ wireguard_persistent_keepalive }}

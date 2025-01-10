@@ -1,0 +1,13 @@
+
+- name: Install WireGuard
+  import_tasks: install.yml
+
+- name: Generate WireGuard keys if needed
+  import_tasks: keys.yml
+
+- name: Configure WireGuard
+  import_tasks: config.yml
+
+- name: Run the playbook to setup the EDGE.
+  ansible.builtin.import_playbook: routing_to_edge.yml
+  tags: routing_to_edge

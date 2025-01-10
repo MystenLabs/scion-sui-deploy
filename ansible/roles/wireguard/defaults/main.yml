@@ -1,0 +1,12 @@
+# roles/wireguard/defaults/main.yml
+
+wireguard_interface: "wg0"
+wireguard_config_path: "/etc/wireguard"
+wireguard_package: "wireguard"
+
+# Example defaults
+wireguard_private_key: ""
+wireguard_public_key: ""
+wireguard_allowed_ips: "0.0.0.0/0"
+wireguard_endpoint: "vpn.example.com:51820"
+wireguard_persistent_keepalive: 25
