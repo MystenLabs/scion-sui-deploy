@@ -22,7 +22,7 @@
 # Mysten nrt host primary nic
  - isd_as: 66-2:0:59
    cidr_ranges:
-     - 167.179.84.117/32
+     - 202.182.103.246/32
 # mysten-scion-testnet-chi host primary nic
  - isd_as: 67-2:0:80
    cidr_ranges:
