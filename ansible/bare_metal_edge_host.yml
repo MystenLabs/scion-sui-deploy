@@ -14,6 +14,9 @@
       deploy_edge_metal_download: "{{ package_edge_download }}"
 
     - role: routing_to_edge
+      when: 
+        - deployment_type is defined
+        - deployment_type == "dedicated"
       routing_to_edge_interface: "{{ bgp_if_name | default(public_interface) }}"
       routing_to_edge_addresses:
         - "fd00:05c1:0400::1/126"

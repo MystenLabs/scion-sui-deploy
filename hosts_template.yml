@@ -29,7 +29,12 @@ regionA:
       public_interface: "{{ undef(hint='You must specify an interface, e.g., eno1') }}"
       # Public IPv4 address of the Sui Full Node/Valdator 
       public_ipv4: "{{ undef(hint='You must specify the public IPv4 of your Sui node, e.g. xxx.xxx.xxx.xxx') }}"
+      public_ipv4_cidr: "{{ undef(hint='You must specify the public IPv4 CIDR of your Sui node, e.g. xxx.xxx.xxx.xxx/31') }}"
       public_ipv4_gateway: "{{ undef(hint='You must specify the public IPv4 gatewayof your Sui node, e.g. xxx.xxx.xxx.xxx') }}"
+      
+      public_ipv6: "{{ undef(hint='You must specify the public IPv6 of your Sui node, e.g. fd00:05c1:0400::2') }}"
+      public_ipv6_cidr: "{{ undef(hint='You must specify the public IPv6 CIDR of your Sui node, e.g. fd00:05c1:0400::2/126') }}"
+      public_ipv6_gateway: "{{ undef(hint='You must specify the public IPv6 gateway of your Sui node, e.g. fd00:05c1:0400::1') }}"
       # The inventory hostname of the hosted EDGE
       hosted_edge: edge
 
@@ -57,19 +62,23 @@ regionA:
     dns:
       - address: 9.9.9.9
       - address: 149.112.112.112
+      - address: 2620:fe::fe
+      - address: 2620:fe::9
     metrics_labels:
       product: "edge"
     appliance_hostname: "anapaya-edge"
-    # ebgp_multihop: 2 # if the bare metal host and edge appliance have IP's on different subnets, you will want to uncomment this.
 
+    # set to 'dedicated' to run an edge vm on the validator host. This will also deploy frr/bgp on the bare metal host to peer with the edge vm
+    # 'shared' mode will run an edge vm on a separate host.
+    # deploy_type: dedicated
+    
+    # in 'dedicated' deployment types,if the bare metal host and edge appliance have IP's on different subnets, you will want to uncomment this.
+    # ebgp_multihop: 2 
     
     # Directory in which secret values are stored on the controller
     secrets_dir: "{{ undef(hint='You must specify a path to the generated secrets, e.g., /home/ubuntu/secrets') }}"
     # Directory of the deployment package provided by Mysten Labs
     deployment_package_path: "{{ undef(hint='You must specify a path to the provided deployment package, e.g., /home/ubuntu/deployment_package.qcow') }}"
-
-    # uncomment to use a linux bridge and not sr-iov. This is preferred if your server is not running on an anapaya supported nic.
-    # deploy_edge_metal_virt_type: virtio
 
     # uncomment to use bgp only bridge
     # deploy_edge_metal_bgp_only_bridge: true

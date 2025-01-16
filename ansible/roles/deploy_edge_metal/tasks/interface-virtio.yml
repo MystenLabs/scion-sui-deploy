@@ -1,22 +1,22 @@
-- name: Ensure bridge interface exists
-  ansible.builtin.command: ip link add name scionwan type bridge
-  ignore_errors: true
-  become: true
+# - name: Ensure bridge interface exists
+#   ansible.builtin.command: ip link add name scionwan type bridge
+#   ignore_errors: true
+#   become: true
 
-- name: Bring up bridge interface
-  ansible.builtin.command: ip link set scionwan up
-  become: true
+# - name: Bring up bridge interface
+#   ansible.builtin.command: ip link set scionwan up
+#   become: true
 
-- name: Copy bridge script template to remote server
-  ansible.builtin.template:
-    src: bridge_toggle.sh.j2
-    dest: /usr/local/sbin/bridge_toggle.sh
-    mode: '0755'
-  become: true
+# - name: Copy bridge script template to remote server
+#   ansible.builtin.template:
+#     src: bridge_toggle.sh.j2
+#     dest: /usr/local/sbin/bridge_toggle.sh
+#     mode: '0755'
+#   become: true
 
-- name: Execute bridge attach
-  ansible.builtin.command: /usr/local/sbin/bridge_toggle.sh attach
-  become: true
+# - name: Execute bridge attach
+#  ansible.builtin.command: /usr/local/sbin/bridge_toggle.sh attach
+#  become: true
 
 - name: Check for netplan configuration files
   ansible.builtin.find:
@@ -24,13 +24,14 @@
     patterns: "*.yaml"
   register: netplan_files
   become: true
-- name: Backup and modify netplan configs if they exist
-  when: netplan_files.matched > 0
-  block:
-    - name: Disable cloud-init network configuration
-      ansible.builtin.copy:
-        content: |
-          network: {config: disabled}
-        dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
-        mode: '0644'
-      become: true
+
+- name: Deploy netplan configuration from template
+  ansible.builtin.template:
+    src: 99-netplan-scionwan.yaml.j2 
+    dest: /etc/netplan/99-netplan-scionwan.yaml 
+    mode: '0644'
+  become: true
+
+- name: Apply netplan configuration
+  ansible.builtin.command: netplan apply
+  become: true

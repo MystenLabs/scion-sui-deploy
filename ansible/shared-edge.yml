@@ -1,0 +1,4 @@
+---
+- name: Run the playbook to setup the host metal.
+  ansible.builtin.import_playbook: bare_metal_edge_host.yml
+  tags: bare_metal
