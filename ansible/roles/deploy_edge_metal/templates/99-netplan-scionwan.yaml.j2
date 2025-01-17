@@ -3,6 +3,8 @@ network:
       {{ deploy_edge_metal_public_interface }}:
         dhcp4: no
         dhcp6: no
+        addresses: []
+        routes: []
     bridges:
       scionwan:
         dhcp4: no
@@ -12,9 +14,9 @@ network:
           - {{ public_ipv4_cidr }}
           - {{ public_ipv6_cidr }}
         routes:
-          - to: default
+          - to: "0.0.0.0/0"
             via: {{ public_ipv4_gateway }}
-          - to: default
+          - to: "::/0"
             via: {{ public_ipv6_gateway }}
         nameservers:
           addresses: {{ dns | map(attribute='address') | list }}

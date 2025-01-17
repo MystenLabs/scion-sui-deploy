@@ -41,3 +41,4 @@
     pciid: "{{ ansible_facts[__deploy_edge_metal_router_interface].pciid | default('') }}"
     host_device: "{{ 'pci_' ~ (pciid | replace('.', '_') | replace (':', '_')) }}"
   changed_when: true
+  become: true

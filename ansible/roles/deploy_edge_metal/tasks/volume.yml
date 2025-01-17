@@ -27,6 +27,7 @@
       when: __define_pool.changed
       ansible.builtin.command: virsh pool-start {{ __deploy_edge_metal_storage_pool_name }}
       changed_when: true
+  become: true
 
 - name: volume | Download the Anapaya EDGE image
   ansible.builtin.get_url:
@@ -44,6 +45,7 @@
     - __edge_volume_info.rc != 0
     - "'Storage volume not found' not in __edge_volume_info.stderr"
   changed_when: false
+  become: true
 
 - name: volume | Customize the downloaded EDGE image
   when: __edge_download.changed or __edge_volume_info.rc != 0
@@ -104,3 +106,4 @@
             {{ __deploy_edge_metal_customized_image }}
             --pool {{ __deploy_edge_metal_storage_pool_name }}
           changed_when: true
+      become: true
