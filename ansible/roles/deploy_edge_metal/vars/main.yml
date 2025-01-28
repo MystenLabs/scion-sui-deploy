@@ -29,8 +29,8 @@ __deploy_edge_metal_storage_pool_name: edge-images
 __deploy_edge_metal_internal_network_name: scion_internal
 # Name, memory, and vcpus of the EDGE domain (VM) created on libvirt
 __deploy_edge_metal_vm_name: anapaya-edge
-__deploy_edge_metal_vm_memory_mib: 2048
-__deploy_edge_metal_vm_vcpus: 2
+__deploy_edge_metal_vm_memory_mib: "{{ vm_memory_mib | default(2048) }}"
+__deploy_edge_metal_vm_vcpus: "{{ vm_vcpus | default(2) }}"
 __deploy_edge_metal_virt_type: "{{ deploy_edge_metal_virt_type | default('virtio') }}"
 __deploy_edge_metal_bgp_bridge: "{{ deploy_edge_metal_bgp_bridge | default(false) }}"
 __deploy_edge_metal_bgp_network_name: scion_bgp

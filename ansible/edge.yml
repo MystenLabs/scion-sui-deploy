@@ -6,11 +6,27 @@
     - "{{ deployment_package_config }}"
   vars:
     host_ipv4: "{{ hostvars[vm_host]['public_ipv4'] }}"
+    base_ethernets:
+      - name: "{{ network_config.mgmt_if_name | default('enp2s0')}}"
+        driver: LINUX
+        addresses:
+          - 192.168.18.2/24
+      - name: "{{ network_config.if_name | default('enp1s0')}}"
+        driver: VPP_DPDK
+        gateway:
+          ipv4_gateway: "{{ network_config.gateway }}"
+        addresses:
+          - "{{ network_config.ipv4_cidr }}"
+          - "fd00:05c1:0400::2/126"
+    bgp_ethernet:
+      - name: "{{ network_config.bgp_if_name | default('enp6s0')}}"
+        driver: VPP_DPDK
+        addresses:
+          - "192.168.17.2/30"
   pre_tasks:
     - name: Wait up to 5m for a connection to the EDGE
       ansible.builtin.wait_for_connection:
         timeout: 300
-
     - name: Wait up to 5m for the VM installation to complete
       ansible.builtin.wait_for:
         path: /home/anapaya/.setup_complete
@@ -31,19 +47,4 @@
       edge_neighbors: "{{ package_scion_neighbors }}"
       edge_advertised_ranges: >-
         {{ lookup('ansible.builtin.file', 'files/advertised_ip_ranges.yml') | from_yaml }}
-      edge_ethernets:
-        - name: "{{ network_config.mgmt_if_name | default('enp1s0')}}"
-          driver: LINUX
-          addresses:
-            - 192.168.18.2/24
-        - name: "{{ network_config.if_name | default('enp5s0')}}"
-          driver: VPP_DPDK
-          gateway:
-            ipv4_gateway: "{{ network_config.gateway }}"
-          addresses:
-            - "{{ network_config.ipv4_cidr }}"
-            - "fd00:05c1:0400::2/126"
-        - name: "{{ network_config.bgp_if_name | default('enp6s0')}}"
-          driver: VPP_DPDK
-          addresses:
-            - "192.168.17.2/30"
+      edge_ethernets: "{{ base_ethernets + bgp_ethernet if enable_bgp_interface | default(false) else base_ethernets }}"
