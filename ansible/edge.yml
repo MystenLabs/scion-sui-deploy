@@ -24,13 +24,13 @@
         addresses:
           - "192.168.17.2/30"
   pre_tasks:
-    - name: Wait up to 5m for a connection to the EDGE
+    - name: Wait up to 10m for a connection to the EDGE
       ansible.builtin.wait_for_connection:
-        timeout: 300
-    - name: Wait up to 5m for the VM installation to complete
+        timeout: 600
+    - name: Wait up to 10m for the VM installation to complete
       ansible.builtin.wait_for:
         path: /home/anapaya/.setup_complete
-        timeout: 300
+        timeout: 600
         sleep: 10
   roles:
     - role: edge
