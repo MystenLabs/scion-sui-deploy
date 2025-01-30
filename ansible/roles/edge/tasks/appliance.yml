@@ -37,7 +37,7 @@
         method: GET
       register: edge_appliance_config
 
-    - name: Put appliance configuration
+    - name: Put appliance configuration for dedicated edge
       ansible.builtin.uri:
         url: https://127.0.0.1/api/v1/config
         method: PUT
@@ -45,6 +45,17 @@
         body: "{{ lookup('ansible.builtin.template', 'appliance.json.j2') }}"
       register: _this
       changed_when: _this.json != edge_appliance_config.json
+      when: 'deploy_type is defined and deploy_type == "dedicated"'
+
+    - name: Put minimal appliance configuration for shared edge
+      ansible.builtin.uri:
+        url: https://127.0.0.1/api/v1/config
+        method: PUT
+        body_format: json
+        body: "{{ lookup('ansible.builtin.template', 'appliance-minimal.json.j2') }}"
+      register: _this
+      changed_when: _this.json != edge_appliance_config.json
+      when: 'deploy_type is undefined or deploy_type == "shared"'
 
     - name: Add TRCs
       tags: trcs

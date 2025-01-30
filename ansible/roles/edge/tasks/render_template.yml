@@ -5,3 +5,8 @@
     dest: /tmp/edge_config.txt
   tags: render
 
+- name: Render appliance-minimal template to file
+  template:
+    src: templates/appliance-minimal.json.j2
+    dest: /tmp/edge_minimal_config.txt
+  tags: render
