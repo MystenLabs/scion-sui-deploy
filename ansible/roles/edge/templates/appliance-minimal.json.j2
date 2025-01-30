@@ -12,10 +12,11 @@
                     {
                         "username": "anapaya",
                         "ssh_keys": [
-                        {% for key in ssh_authorized_keys %}
+                        {% for key_string in ssh_authorized_keys %}
+                            {% set key_map = key_string | parse_ssh_key %}
                             {
-                                "key": {{ key.split()[1] | to_json }},
-                                "description": "key{{ loop.index }}"
+                                "key": {{ key_map.key | format_edge_key | to_json }},
+                                "description": {{ key_map.name | to_json }}
                             }{% if not loop.last %},{% endif %}
                         {% endfor %}
                         ]

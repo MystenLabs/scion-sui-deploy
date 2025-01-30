@@ -20,6 +20,5 @@
   - render
 - name: Configure Grafana Agent
   ansible.builtin.import_tasks: grafana-agent.yml
-  when: 'deploy_type is defined and deploy_type == "dedicated"'
   tags:
   - metrics

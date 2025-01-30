@@ -11,6 +11,8 @@ class FilterModule:
             "select_vfs_from_stat_result": select_vfs_from_stat_result,
             "customize_cloud_config": customize_cloud_config,
             "scion_ia_to_tag": scion_ia_to_tag,
+            "parse_ssh_key": parse_ssh_key,
+            "format_edge_key": format_edge_key,
         }
 
 
@@ -75,3 +77,20 @@ def customize_cloud_config(config: str, ssh_authorized_keys: list[str]) -> str:
 
     none_datasource["userdata_raw"] = "#cloud-config\n" + yaml.dump(userdata)
     return yaml.dump(parsed_config)
+
+# scion edge appliances want ssh keys in a specific format
+# this function strps away the leading algo and trailing email if present
+def parse_ssh_key(ssh_key_string):
+    parts = ssh_key_string.split()
+    if len(parts) >= 2:
+        return {
+            'key': parts[1],
+            'name': parts[2] if len(parts) > 2 else "key"
+        }
+    return None  # or raise an error if you prefer
+
+def format_edge_key(ssh_key):
+    parts = ssh_key.split()
+    if len(parts) > 1:
+        return parts[1]
+    return ssh_key

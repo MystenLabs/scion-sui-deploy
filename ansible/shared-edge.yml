@@ -2,3 +2,8 @@
 - name: Run the playbook to setup the host metal.
   ansible.builtin.import_playbook: bare_metal_edge_host.yml
   tags: bare_metal
+- name: Run the playbook to configure base config on edge.
+  ansible.builtin.import_playbook: edge.yml
+  tags: edge
+  vars:
+    ansible_run_tags: ["config", "keys", "trcs"]

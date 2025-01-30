@@ -8,6 +8,11 @@
                     {{- server | to_json }}{% if not loop.last %},{% endif %}
                 {% endfor %}
                 ]
+            },
+            "vpp": {
+                "tun": {
+                    "prefixes": []
+                }
             }
         },
         "management": {
@@ -16,10 +21,11 @@
                     {
                         "username": "anapaya",
                         "ssh_keys": [
-                        {% for key in ssh_authorized_keys %}
+                        {% for key_string in ssh_authorized_keys %}
+                            {% set key_map = key_string | parse_ssh_key %}
                             {
-                                "key": {{ key.split()[1] | to_json }},
-                                "description": "key{{ loop.index }}"
+                                "key": {{ key_map.key | format_edge_key | to_json }},
+                                "description": {{ key_map.name | to_json }}
                             }{% if not loop.last %},{% endif %}
                         {% endfor %}
                         ]
@@ -32,11 +38,11 @@
             "telemetry": {
             {% if logging_url is defined %}
                 "logging": {
-                  "logging_type": "LOKI",
-                  "loki": {
-                    "url": "{{ logging_url }}"
+                    "logging_type": "LOKI",
+                    "loki": {
+                        "url": "{{ logging_url }}"
                     }
-                 },
+                },
             {% endif %}
             {% if metrics_labels is defined %}
                 "address": "192.168.18.2:42001",
@@ -71,7 +77,58 @@
             }
         },
         "interfaces": {
+            "wireguards": [
+                {
+                    "addresses": [
+                        "10.0.0.1/24"
+                    ],
+                    "name": "wg0",
+                    "peers": [
+                        {
+                            "allowed_ips": [
+                                "0.0.0.0/0"
+                            ]
+                        }
+                    ],
+                    "port": 51021,
+                    "routes": []
+                }
+            ],
             "ethernets": {{ edge_ethernets | to_nice_json }}
+        },
+        "firewall": {
+            "mode": "PREPEND",
+            "tables": [
+                {
+                    "chains": [
+                        {
+                            "name": "default_forward",
+                            "rules": [
+                                {
+                                    "comment": "allow wg0 to forward",
+                                    "rule": "iifname \"wg0\" counter name \"wg_forward\" accept",
+                                    "sequence_id": 0
+                                },
+                                {
+                                    "comment": "allow wg0 return forward",
+                                    "rule": "oifname \"wg0\" counter name \"wg_return\" accept",
+                                    "sequence_id": 1
+                                }
+                            ]
+                        }
+                    ],
+                    "counters": [
+                        {
+                            "name": "wg_forward"
+                        },
+                        {
+                            "name": "wg_return"
+                        }
+                    ],
+                    "family": "INET",
+                    "name": "appliance"
+                }
+            ]
         },
         "scion": {
             "ases": [
@@ -130,7 +187,7 @@
                         "announce_filter": [
                             {
                                 "prefixes": [
-                                "0.0.0.0/0"
+                                    "0.0.0.0/0"
                                 ],
                                 "action": "ACCEPT",
                                 "sequence_id": 0
@@ -143,8 +200,8 @@
                             "traffic_matcher": "default",
                             "failover_sequence": [
                                 {
-                                "sequence_id": 0,
-                                "path_filter": "allow_all"
+                                    "sequence_id": 0,
+                                    "path_filter": "allow_all"
                                 }
                             ]
                         }
