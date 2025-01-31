@@ -1,0 +1,8 @@
+---
+package_edge_download:
+  access_token: <<<ASK_MYSTEN_FOR_TOKEN>>>
+  version: sys_v2.10.0-scion_v0.36.0-1
+  checksum: a1b1302d7ac74e5a3822e0dc8b88a7f4701c863f66239ed0f17c81b9faf55780
+
+metrics_username: scion_metrics_1
+metrics_password: <<<ASK_MYSTEN_FOR_PASSWORD>>>
