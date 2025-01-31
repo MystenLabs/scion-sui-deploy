@@ -31,6 +31,6 @@ __storage_pool_name: edge-images
 # Name of the libvirt network to create for host to EDGE communication
 __internal_network_name: scion_internal
 # Name, memory, and vcpus of the EDGE domain (VM) created on libvirt
-__anapaya_edge_vm_name: anapaya-edge
+__anapaya_edge_vm_name: {{ appliance_hostname }}
 __anapaya_edge_vm_memory_mib: 2048
 __anapaya_edge_vm_vcpus: 2
