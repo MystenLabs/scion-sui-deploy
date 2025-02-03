@@ -1,5 +1,5 @@
 # Global repo - Mysten maintainers
-* @jpcsmith @mlegner @chris-gorham @suiwombat
+* @chris-gorham @suiwombat @MystenLabs/mysten-pe
 
 # CODEOWNERS owners
 /.github/CODEOWNERS @MystenLabs/mysten-pe

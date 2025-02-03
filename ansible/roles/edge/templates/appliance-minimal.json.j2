@@ -1,0 +1,51 @@
+#jinja2: trim_blocks:False
+{
+    "config": {
+        "system": {
+            "dns": {
+                "servers": [{% for server in dns %}{{ server | to_json }}{% if not loop.last %},{% endif %}{% endfor %}]
+            }
+        },
+        "management": {
+            "ssh": {
+                "users": [
+                    {
+                        "username": "anapaya",
+                        "ssh_keys": [
+                        {% for key_string in ssh_authorized_keys %}
+                            {% set key_map = key_string | parse_ssh_key %}
+                            {
+                                "key": {{ key_map.key | format_edge_key | to_json }},
+                                "description": {{ key_map.name | to_json }}
+                            }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                        ]
+                    }
+                ]
+            },
+            {% if appliance_hostname is defined %}
+            "hostname": "{{ appliance_hostname }}",
+            {% endif %}
+            "api": {
+                "listeners": [
+                    {
+                        "address": "127.0.0.1:443",
+                        "description": "localhost"
+                    }
+                ],
+                "basic_auth": {
+                    "enabled": true,
+                    "users": [
+                        {
+                            "username": "anapaya",
+                            "password_hashed": "$2a$10$W7LRMh1MAA7ptvA335U3g.WXMaCb.EHjUCKILXUkjKdm9lJV/0FBC"
+                        }
+                    ]
+                }
+            }
+        },
+        "interfaces": {
+            "ethernets": {{ edge_ethernets | to_nice_json }}
+        }
+    }
+}

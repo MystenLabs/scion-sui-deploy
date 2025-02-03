@@ -29,8 +29,20 @@ regionA:
       public_interface: "{{ undef(hint='You must specify an interface, e.g., eno1') }}"
       # Public IPv4 address of the Sui Full Node/Valdator 
       public_ipv4: "{{ undef(hint='You must specify the public IPv4 of your Sui node, e.g. xxx.xxx.xxx.xxx') }}"
+      public_ipv4_cidr: "{{ undef(hint='You must specify the public IPv4 CIDR of your Sui node, e.g. xxx.xxx.xxx.xxx/31') }}"
+      public_ipv4_gateway: "{{ undef(hint='You must specify the public IPv4 gatewayof your Sui node, e.g. xxx.xxx.xxx.xxx') }}"
+      
+      public_ipv6: "{{ undef(hint='You must specify the public IPv6 of your Sui node, e.g. fd00:05c1:0400::2') }}"
+      public_ipv6_cidr: "{{ undef(hint='You must specify the public IPv6 CIDR of your Sui node, e.g. fd00:05c1:0400::2/126') }}"
+      public_ipv6_gateway: "{{ undef(hint='You must specify the public IPv6 gateway of your Sui node, e.g. fd00:05c1:0400::1') }}"
       # The inventory hostname of the hosted EDGE
       hosted_edge: edge
+
+      # -- VM resource configuration
+      # if empty, default values of vcpu=2 and vm_memory_mib=2048 will be used.
+      vm_memory_mib: 16384
+      vm_vcpus: 4
+
 
     edge:
       # -- SSH options
@@ -47,7 +59,8 @@ regionA:
         # This is a secondary IP address/netmask to be dedicated to the Edge. 
         ipv4_cidr: "{{ undef(hint='Specify the public IP address and CIDR of the EDGE e.g., xxx.xxx.xxx.xxx/31') }}"
         gateway: "{{ undef(hint='Specify the IP address of the network gateway e.g., xxx.xxx.xxx.1') }}"
-
+        # if_name: "enp1s0"
+      
       # Public IPv4 address to be configured on the EDGE.
       # Defaults to the network address above without the CIDR range.
       public_ipv4: "{{ network_config.ipv4_cidr | ansible.utils.ipaddr('address') }}"
@@ -56,15 +69,32 @@ regionA:
     dns:
       - address: 9.9.9.9
       - address: 149.112.112.112
+      - address: 2620:fe::fe
+      - address: 2620:fe::9
     metrics_labels:
       product: "edge"
+      #appliance: "<hostname>.appliance"
+      #project: "sui-scion-<network>"
+      #shortname: "<hostname>-edge"
     appliance_hostname: "anapaya-edge"
-    # ebgp_multihop: 2 # if the bare metal host and edge appliance have IP's on different subnets, you will want to uncomment this.
+
+    # set to 'dedicated' to run an edge vm on the validator host. This will also deploy frr/bgp on the bare metal host to peer with the edge vm
+    # 'shared' mode will run an edge vm on a separate host.
+    # deploy_type: dedicated
+
+    # Enable logging to Loki from the edge appliance.
+    # logging_url: "<loki_url>"
+    
+    # in 'dedicated' deployment types,if the bare metal host and edge appliance have IP's on different subnets, you will want to uncomment this
+    # ebgp_multihop: 2 
+    
     # Directory in which secret values are stored on the controller
     secrets_dir: "{{ undef(hint='You must specify a path to the generated secrets, e.g., /home/ubuntu/secrets') }}"
     # Directory of the deployment package provided by Mysten Labs
     deployment_package_path: "{{ undef(hint='You must specify a path to the provided deployment package, e.g., /home/ubuntu/deployment_package.qcow') }}"
 
+    # uncomment to use bgp only bridge
+    # deploy_edge_metal_bgp_only_bridge: true
     # Paths derived from the above
     deployment_package_config: "{{ deployment_package_path }}/config.yml"
     scion_trcs_path: "{{ deployment_package_path }}/trcs"
