@@ -4,7 +4,7 @@ log syslog informational
 router bgp {{ routing_to_edge_bgp_asn }}
  neighbor {{ routing_to_edge_edge_ipv4 }} remote-as {{ routing_to_edge_bgp_edge_asn }}
  neighbor {{ routing_to_edge_edge_ipv4 }} timers 1 3
- neighbor {{ routing_to_edge_edge_ipv4 }} route-map SET_NEXTHOP in
+ neighbor {{ routing_to_edge_edge_ipv4 }} soft-reconfiguration inbound
  no bgp ebgp-requires-policy
 !
 interface scion_bgp
@@ -21,5 +21,5 @@ ip protocol bgp route-map RM1
 
 route-map SET_NEXTHOP permit 10
  match ip address prefix-list ANY
- set ip next-hop {{ hostvars['edge']['public_ipv4'] }}
+ set ip next-hop {{ public_ipv4 }}
 exit

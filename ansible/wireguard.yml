@@ -1,16 +1,14 @@
 ---
 - name: Configure bare metal host to use wireguard
   hosts: bare_metal_hosts
-  gather_facts: false
-  vars_files:
-    - "{{ deployment_package_config }}"
-  vars:
-    host_ipv4: "{{ hostvars[vm_host]['public_ipv4'] }}"
+  gather_facts: true
   roles:
     - role: wireguard
-      wireguard_interface: "{{ public_interface }}"
-      wireguard_private_key: "{{ wireguard_private_key }}"
-      wireguard_public_key: "{{ wireguard_public_key }}"
-      wireguard_allowed_ips: "{{ wireguard_allowed_ips }}"
-      wireguard_endpoint: "{{ wireguard_endpoint }}"
-      wireguard_persistent_keepalive: "{{ wireguard_persistent_keepalive }}"
+  vars:
+    wireguard_interface: "wg0"
+    wireguard_private_key: "{{ wireguard.interface.private_key }}"
+    wireguard_public_key: "{{ wireguard.peer.public_key }}"
+    wireguard_allowed_ips: "{{ wireguard.peer.allowed_ips }}"
+    wireguard_endpoint: "{{ wireguard.peer.endpoint }}"
+    wireguard_persistent_keepalive: "{{ wireguard.peer.persistent_keepalive }}"
+    wireguard_config_path: "/etc/wireguard"

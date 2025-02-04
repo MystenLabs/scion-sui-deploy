@@ -1,4 +1,4 @@
-
+---
 - name: Generate WireGuard private key if none is provided
   ansible.builtin.command: wg genkey
   register: wireguard_private_key_generation

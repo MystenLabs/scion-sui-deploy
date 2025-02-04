@@ -1,4 +1,4 @@
-
+---
 - name: Create WireGuard config directory
   ansible.builtin.file:
     path: "{{ wireguard_config_path }}"
@@ -6,6 +6,11 @@
     owner: root
     group: root
     mode: '0755'
+  become: true
+
+- name: Load CIDR ranges from YAML
+  set_fact:
+    scion_cidr_ranges: "{{ lookup('file', 'advertised_ip_ranges.yml') | from_yaml }}"
 
 - name: Configure WireGuard interface
   ansible.builtin.template:
@@ -14,9 +19,13 @@
     owner: root
     group: root
     mode: '0600'
+  vars:
+    allowed_ips: "{{ scion_cidr_ranges | flatten_cidr_ranges(wireguard.peer.allowed_ips) | join(', ') }}"
+  become: true
 
 - name: Enable and start WireGuard interface
   ansible.builtin.systemd:
     name: "wg-quick@{{ wireguard_interface }}"
     enabled: true
     state: started
+  become: true

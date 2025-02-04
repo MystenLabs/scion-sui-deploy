@@ -1,4 +1,4 @@
-
+---
 - name: Install WireGuard
   import_tasks: install.yml
 
@@ -8,6 +8,12 @@
 - name: Configure WireGuard
   import_tasks: config.yml
 
-- name: Run the playbook to setup the EDGE.
-  ansible.builtin.import_playbook: routing_to_edge.yml
-  tags: routing_to_edge
+- name: Run the playbook to setup the sui-node to wireguard peer
+  import_role:
+    name: routing_to_edge
+  vars:
+    routing_to_edge_interface: "wg0"
+    routing_to_edge_addresses:
+      - "fd00:05c1:0400::1/126"
+      - "{{ wireguard.interface.address }}"
+    routing_to_edge_edge_ipv4: "{{ wireguard.peer.ip }}"

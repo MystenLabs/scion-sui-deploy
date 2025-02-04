@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import yaml
+from typing import Union
 
 
 class FilterModule:
@@ -13,8 +14,8 @@ class FilterModule:
             "scion_ia_to_tag": scion_ia_to_tag,
             "parse_ssh_key": parse_ssh_key,
             "format_edge_key": format_edge_key,
+            "flatten_cidr_ranges": flatten_cidr_ranges,
         }
-
 
 def scion_ia_to_tag(
     isd_as: str, sep: str = "_", isd_prefix="isd", asn_prefix="as"
@@ -94,3 +95,32 @@ def format_edge_key(ssh_key):
     if len(parts) > 1:
         return parts[1]
     return ssh_key
+
+def flatten_cidr_ranges(data: list[dict[str, Union[str, list[str]]]], additional_allowed_ips: list[str]) -> list[str]:
+    """Extract and flatten CIDR ranges from the YAML structure.
+    
+    Args:
+        data: List of dictionaries containing isd_as and cidr_ranges
+        
+    Returns:
+        List of CIDR ranges extracted from all entries
+        
+    Example:
+        Input YAML structure:
+        - isd_as: 66-2:0:5b
+          cidr_ranges:
+            - 45.250.255.101/32
+        - isd_as: 65-2:0:58
+          cidr_ranges:
+            - 103.50.32.105/32
+            
+        Returns: [45.250.255.101/32, 103.50.32.105/32]
+    """
+    result = []
+    for entry in data:
+        if 'cidr_ranges' in entry:
+            result.extend(entry['cidr_ranges'])
+
+    if additional_allowed_ips:
+        result.extend([str(cidr).strip("'\"") for cidr in additional_allowed_ips])
+    return result

@@ -1,0 +1,66 @@
+---
+# The bare-metal hosts that will be running both the Sui validator and hosting the EDGE VM.
+bare_metal_hosts:
+  hosts:
+    baremetal-suival:
+
+# The inventory hostname used to refer to the edge.
+edge_vms:
+  hosts:
+    edge:
+
+all:
+  vars:
+
+regionA:
+  hosts:
+    baremetal-suival:
+      # -- SSH options
+      # if you are running this playbook locally, this would be localhost. Otherwise it needs to be an IP or DNS resolvable hostname.
+      ansible_host: "{{ undef(hint='You must specify the ansible host, e.g. localhost') }}"
+      # this username needs to have SSH login privileges (SSH key setup) on the ansible_host setup above.
+      ansible_user: "{{ undef(hint='You must specify the ansible username, e.g., ubuntu') }}"
+
+      # -- Configuration
+      # Public IP addresses of the Sui Full Node/Valdator 
+      public_ipv4: "{{ undef(hint='You must specify the public IPv4 of your Sui node, e.g. xxx.xxx.xxx.xxx') }}"
+      public_ipv6: "{{ undef(hint='You must specify the public IPv6 of your Sui node, e.g. xxx.xxx.xxx.xxx') }}" # this is the wg tunnel underlay IP
+
+
+      # -- Wireguard configuration
+      wireguard:
+        interface:
+          address: "{{ undef(hint='You must specify the wireguard ip of your wg0 interface, e.g. xxx.xxx.xxx.xxx/24') }}" # the wireguard interface IP address
+          private_key: ""  # will be overridden by generated_wireguard_private_key if available
+          listen_port: 51820  # default
+
+        peer:
+          public_key: "" # the wireguard peer public key
+          endpoint: "<peer_public_ip>:51820" # public IP of wireguard peer
+          allowed_ips:
+            - 10.0.0.0/24
+          persistent_keepalive: 25  # default
+          ip: "10.0.0.1" # the peer wireguard interface IP address, used for bgp config generation
+      
+  vars:
+
+
+# Rough Visualization of the wireguard setup
+# +------------------+                         +------------------+
+# |    Validator     |                         |    Scion EDGE     |
+# |                  |                         |                  |
+# |  +------------+  |                         |  +------------+  |
+# |  |    wg0     |  |                         |  |    wg0     |  |
+# |  | 10.0.0.2/24|  |                         |  | 10.0.0.1/24|  |
+# |  |            |  |=========================|  |            |  |
+# |  +------------+  |      WireGuard          |  +------------+  |
+# |                  |                         |                  |
+# |  +------------+  |                         |  +------------+  |
+# |  |   eno1     |  |      WireGuard          |  |   eno1     |  |
+# |  | 203.0.113.2|  |   Transport Endpoint    |  | 203.0.113.1|  |
+# |  | 2001:db8::2|  |=========================|  | 2001:db8::1| |
+# |  +------------+  |                         |  +------------+  |
+# |                  |                         |                  |
+# +------------------+                         +------------------+
+#
+# IP's are example only

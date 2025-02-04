@@ -1,10 +1,13 @@
 [Interface]
-Address = {{ wireguard_allowed_ips }}
-PrivateKey = {{ generated_wireguard_private_key | default(wireguard_private_key) }}
-ListenPort = 51820
+Address = {{ wireguard.interface.address }}
+PrivateKey = {{ generated_wireguard_private_key | default(wireguard.interface.private_key) }}
+ListenPort = {{ wireguard.interface.listen_port | default(51820) }}
+PostUp = iptables -t nat -A POSTROUTING -o wg0 -j SNAT --to-source {{  public_ipv4 }}
+PostDown = iptables -t nat -D POSTROUTING -o wg0 -j SNAT --to-source {{  public_ipv4 }}
+Table = off
 
 [Peer]
-PublicKey = {{ generated_wireguard_public_key | default(wireguard_public_key) }}
-AllowedIPs = {{ wireguard_allowed_ips }}
-Endpoint = {{ wireguard_endpoint }}
-PersistentKeepalive = {{ wireguard_persistent_keepalive }}
+PublicKey = {{ wireguard.peer.public_key }}
+AllowedIPs = {{ allowed_ips }}
+Endpoint = {{ wireguard.peer.endpoint }}
+PersistentKeepalive = {{ wireguard.peer.persistent_keepalive | default(25) }}
