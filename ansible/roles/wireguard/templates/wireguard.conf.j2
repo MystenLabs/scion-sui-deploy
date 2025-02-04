@@ -1,13 +1,16 @@
 [Interface]
-Address = {{ wireguard.interface.address }}
+Address = {% for addr in wireguard.interface.addresses %}{{ addr }}{% if not loop.last %}, {% endif %}{% endfor %}
 PrivateKey = {{ generated_wireguard_private_key | default(wireguard.interface.private_key) }}
 ListenPort = {{ wireguard.interface.listen_port | default(51820) }}
 PostUp = iptables -t nat -A POSTROUTING -o wg0 -j SNAT --to-source {{  public_ipv4 }}
 PostDown = iptables -t nat -D POSTROUTING -o wg0 -j SNAT --to-source {{  public_ipv4 }}
 Table = off
 
+{% for peer in wireguard.peers %}
 [Peer]
-PublicKey = {{ wireguard.peer.public_key }}
-AllowedIPs = {{ allowed_ips }}
-Endpoint = {{ wireguard.peer.endpoint }}
-PersistentKeepalive = {{ wireguard.peer.persistent_keepalive | default(25) }}
+PublicKey = {{ peer.public_key }}
+AllowedIPs = {{ peer.allowed_ips | join(', ') }}
+Endpoint = {{ peer.endpoint }}
+PersistentKeepalive = {{ peer.persistent_keepalive | default(25) }}
+
+{% endfor %}

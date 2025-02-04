@@ -2,12 +2,14 @@ log syslog informational
 
 !
 router bgp {{ routing_to_edge_bgp_asn }}
- neighbor {{ routing_to_edge_edge_ipv4 }} remote-as {{ routing_to_edge_bgp_edge_asn }}
- neighbor {{ routing_to_edge_edge_ipv4 }} timers 1 3
- neighbor {{ routing_to_edge_edge_ipv4 }} soft-reconfiguration inbound
+ {% for bgp_peer in routing_to_edge_edge_ipv4 %}
+ neighbor {{ bgp_peer }} remote-as {{ routing_to_edge_bgp_edge_asn }}
+ neighbor {{ bgp_peer }} timers 1 3
+ neighbor {{ bgp_peer }} soft-reconfiguration inbound
+ {% endfor %}
  no bgp ebgp-requires-policy
 !
-interface scion_bgp
+interface {{ frr_interface_name | default(public_interface) }}
 {% for ip_cidr in routing_to_edge_addresses %}
  {{ "ipv6" if ( ip_cidr | ansible.utils.ipv6 ) else "ip" }} address {{ ip_cidr }}
 {% endfor %}

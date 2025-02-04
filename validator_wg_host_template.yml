@@ -25,42 +25,22 @@ regionA:
       # Public IP addresses of the Sui Full Node/Valdator 
       public_ipv4: "{{ undef(hint='You must specify the public IPv4 of your Sui node, e.g. xxx.xxx.xxx.xxx') }}"
       public_ipv6: "{{ undef(hint='You must specify the public IPv6 of your Sui node, e.g. xxx.xxx.xxx.xxx') }}" # this is the wg tunnel underlay IP
-
+      frr_interface_name: "wg0"
 
       # -- Wireguard configuration
       wireguard:
         interface:
-          address: "{{ undef(hint='You must specify the wireguard ip of your wg0 interface, e.g. xxx.xxx.xxx.xxx/24') }}" # the wireguard interface IP address
+          addresses: 
+            - "{{ undef(hint='You must specify at least one wireguard ip of your wg0 interface, e.g. xxx.xxx.xxx.xxx/32') }}" # the wireguard interface IP address
           private_key: ""  # will be overridden by generated_wireguard_private_key if available
           listen_port: 51820  # default
 
-        peer:
-          public_key: "" # the wireguard peer public key
-          endpoint: "<peer_public_ip>:51820" # public IP of wireguard peer
-          allowed_ips: # must at least have allowed_ips defined. this generally should only be your wireguard ip range here. The scion cidr ranges are pulled from advertised_ip_ranges.yml
-            - 10.0.0.0/24
-          persistent_keepalive: 25  # default
-          ip: "10.0.0.1" # the peer wireguard interface IP address, used for bgp config generation
+        peers:
+          - public_key: "{{ undef(hint='You must specify the wireguard peer public key') }}" # the wireguard peer public key
+            endpoint: "{{ undef(hint='You must specify the peer public IP and port e.g. <peer_public_ipv6>:51820') }}"  # public IPv6 of wireguard peer:port
+            allowed_ips: # must at least have allowed_ips defined. this generally should only be your wireguard ip range here. The scion cidr ranges are pulled from advertised_ip_ranges.yml
+              - 10.0.0.0/24
+            persistent_keepalive: 25  # default
+            ip: "{{ undef(hint='You must specify the peer wireguard tunnel IP e.g. xxx.xxx.xxx.xxx') }}" # the peer wireguard interface IP address, used for bgp config generation
       
   vars:
-
-
-# Rough Visualization of the wireguard setup
-# +------------------+                         +------------------+
-# |    Validator     |                         |    Scion EDGE     |
-# |                  |                         |                  |
-# |  +------------+  |                         |  +------------+  |
-# |  |    wg0     |  |                         |  |    wg0     |  |
-# |  | 10.0.0.2/24|  |                         |  | 10.0.0.1/24|  |
-# |  |            |  |=========================|  |            |  |
-# |  +------------+  |      WireGuard          |  +------------+  |
-# |                  |                         |                  |
-# |  +------------+  |                         |  +------------+  |
-# |  |   eno1     |  |      WireGuard          |  |   eno1     |  |
-# |  | 203.0.113.2|  |   Transport Endpoint    |  | 203.0.113.1|  |
-# |  | 2001:db8::2|  |=========================|  | 2001:db8::1| |
-# |  +------------+  |                         |  +------------+  |
-# |                  |                         |                  |
-# +------------------+                         +------------------+
-#
-# IP's are example only

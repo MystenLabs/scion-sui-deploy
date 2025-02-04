@@ -96,7 +96,7 @@ def format_edge_key(ssh_key):
         return parts[1]
     return ssh_key
 
-def flatten_cidr_ranges(data: list[dict[str, Union[str, list[str]]]], additional_allowed_ips: list[str]) -> list[str]:
+def flatten_cidr_ranges(data: list[dict[str, list[str]]], additional_allowed_ips: list[str]) -> list[str]:
     """Extract and flatten CIDR ranges from the YAML structure.
     
     Args:

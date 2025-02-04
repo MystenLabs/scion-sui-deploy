@@ -13,7 +13,5 @@
     name: routing_to_edge
   vars:
     routing_to_edge_interface: "wg0"
-    routing_to_edge_addresses:
-      - "fd00:05c1:0400::1/126"
-      - "{{ wireguard.interface.address }}"
-    routing_to_edge_edge_ipv4: "{{ wireguard.peer.ip }}"
+    routing_to_edge_addresses: "{{ (['fd00:05c1:0400::1/126'] + (wireguard.interface.addresses)) | join(',') }}"
+    routing_to_edge_edge_ipv4: "{{ wireguard.peers | map(attribute='ip') | join(',') }}"

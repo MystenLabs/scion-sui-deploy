@@ -6,7 +6,8 @@ argument_specs:
     options:
       routing_to_edge_edge_ipv4:
         description: The internal IP address of the EDGE device
-        type: str
+        type: list
+        elements: str
         required: true
 
       routing_to_edge_interface:
