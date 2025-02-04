@@ -15,6 +15,7 @@
 # poetry run ansible-galaxy install -r ansible/requirements.yml
 # cp hosts-sample-latitude-s2-small-regional-edge.yml hosts.yml
 # vi hosts.yml
+# vi config.yml
 # poetry run ansible-playbook -i hosts.yml ansible/shared-edge.yml --connection=local
 # virsh list
 # virsh console <edge_name>
@@ -44,6 +45,7 @@ regionA:
       # running this locally as ubuntu
       ansible_host: "localhost"
       # this username needs to have SSH login privileges (SSH key setup) on the ansible_host setup above.
+      # (not applicable when running locally)
       ansible_user: "ubuntu"
 
       # -- Configuration
@@ -72,8 +74,7 @@ regionA:
       # Uses the bare-metal as a jump host to SSH into the hosted EDGE VM, does not need to be changed.
       ansible_user: anapaya
       ansible_host: 192.168.18.2
-      ansible_ssh_common_args: "-J {{ hostvars[vm_host]['ansible_user'] ~ '@' ~ hostvars[vm_
-host]['ansible_host'] }}"
+      ansible_ssh_common_args: "-J {{ hostvars[vm_host]['ansible_user'] ~ '@' ~ hostvars[vm_host]['ansible_host'] }}"
 
       # -- Configuration
       # Inventory hostname of the bare-metal host associated with this EDGE VM
