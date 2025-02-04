@@ -37,7 +37,7 @@ regionA:
 
         peers:
           - public_key: "{{ undef(hint='You must specify the wireguard peer public key') }}" # the wireguard peer public key
-            endpoint: "{{ undef(hint='You must specify the peer public IP and port e.g. <peer_public_ipv6>:51820') }}"  # public IPv6 of wireguard peer:port
+            endpoint: "{{ undef(hint='You must specify the peer public IP and port. for ipv6 include [] around ipv6 addr e.g. [<peer_public_ipv6>]:51820') }}"  # public IPv6 of wireguard peer:port
             allowed_ips: # must at least have allowed_ips defined. this generally should only be your wireguard ip range here. The scion cidr ranges are pulled from advertised_ip_ranges.yml
               - 10.0.0.0/24
             persistent_keepalive: 25  # default
