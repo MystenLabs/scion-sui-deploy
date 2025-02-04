@@ -37,7 +37,7 @@ regionA:
         peer:
           public_key: "" # the wireguard peer public key
           endpoint: "<peer_public_ip>:51820" # public IP of wireguard peer
-          allowed_ips:
+          allowed_ips: # must at least have allowed_ips defined. this generally should only be your wireguard ip range here. The scion cidr ranges are pulled from advertised_ip_ranges.yml
             - 10.0.0.0/24
           persistent_keepalive: 25  # default
           ip: "10.0.0.1" # the peer wireguard interface IP address, used for bgp config generation
