@@ -30,4 +30,4 @@
 # scionsui-lat-lon1-01 host primary nic
  - isd_as: 65-2:0:89
    cidr_ranges:
-     - 103.219.168.149/32
+     - 103.50.32.105/32

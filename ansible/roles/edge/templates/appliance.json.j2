@@ -77,23 +77,42 @@
             }
         },
         "interfaces": {
+            {% if wireguard is defined and wireguard.interface is defined %}
             "wireguards": [
                 {
                     "addresses": [
-                        "10.0.0.1/24"
+                        {% for address in wireguard.interface.addresses %}
+                        "{{ address }}"{% if not loop.last %},{% endif %}
+                        {% endfor %}
                     ],
                     "name": "wg0",
                     "peers": [
+                        {% if wireguard.peers is defined %}
+                        {% for peer in wireguard.peers %}
+                        {
+                            "allowed_ips": [
+                                {% for ip in peer.allowed_ips %}
+                                "{{ ip }}"{% if not loop.last %},{% endif %}
+                                {% endfor %}
+                            ]{% if peer.endpoint is defined %},
+                            "endpoint": "{{ peer.endpoint }}"{% endif %}{% if peer.public_key is defined %},
+                            "public_key": "{{ peer.public_key }}"{% endif %}{% if peer.persistent_keepalive is defined %},
+                            "persistent_keepalive": {{ peer.persistent_keepalive }}{% endif %}
+                        }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                        {% else %}
                         {
                             "allowed_ips": [
                                 "0.0.0.0/0"
                             ]
                         }
+                        {% endif %}
                     ],
-                    "port": 51021,
+                    "port": {{ wireguard.interface.listen_port | default(51021) }},
                     "routes": []
                 }
             ],
+            {% endif %}
             "ethernets": {{ edge_ethernets | to_nice_json }}
         },
         "firewall": {
@@ -241,9 +260,33 @@
                     ]
                 }
             ]
-        }
+        },
         {% endif %}
-        {%- if edge_bgp_neighbor_address != "" -%},
+        {%- if wireguard.peers is defined and wireguard.peers | length > 0 -%}
+        "bgp": {
+            "global": {
+                "as": {{ edge_bgp_asn }},
+                "router_id": "{{ edge_internal_ipv4 }}"
+            },
+            "neighbors": [
+                {% for peer in wireguard.peers %}
+                {
+                    "enabled": true,
+                    "neighbor_address": "{{ peer.ip }}",
+                    "peer_as": {{ edge_bgp_peer_asn }},
+                    {% if ebgp_multihop is defined %}
+                    "ebgp_multihop": {{ ebgp_multihop }},
+                    {% endif %}
+                    "timers": {
+                        "hold_time": 3,
+                        "keepalive_interval": 1,
+                        "minimum_advertisement_interval": 1
+                    }
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ]
+        }
+      {% else %}
         "bgp": {
             "global": {
                 "as": {{ edge_bgp_asn }},
@@ -265,6 +308,6 @@
                 }
             ]
         }
-        {%- endif %}
+        {% endif %}
     }
 }

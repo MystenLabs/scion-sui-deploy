@@ -43,7 +43,7 @@
       edge_router_internal_port: 30999
       edge_forwarding_key: "{{ lookup('ansible.builtin.file', scion_forwarding_key_path) }}"
       edge_internal_ipv4: "{{ network_config.ipv4_cidr | ansible.utils.ipaddr('address') }}"
-      edge_bgp_neighbor_address: "{{ bgp_neighbor_address | default('192.168.17.1') }}"
+      edge_bgp_neighbor_address: "{{ wireguard.peer.ip | default('192.168.17.1') }}"
       edge_neighbors: "{{ package_scion_neighbors }}"
       edge_advertised_ranges: >-
         {{ lookup('ansible.builtin.file', 'files/advertised_ip_ranges.yml') | from_yaml }}
