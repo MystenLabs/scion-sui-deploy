@@ -1,0 +1,13 @@
+# roles/wireguard/defaults/main.yml
+
+wireguard:
+  interface:
+    address: "10.0.0.2/24" # the wireguard interface IP address
+    private_key: ""  # will be overridden by generated_wireguard_private_key if available
+    listen_port: 51820  # default
+
+  peer:
+    public_key: "" # the wireguard peer public key
+    allowed_ips: 
+    - "0.0.0.0/0" # can specify more specific ranges if desired 
+    endpoint: "" 

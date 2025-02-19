@@ -21,4 +21,4 @@
       routing_to_edge_addresses:
         - "fd00:05c1:0400::1/126"
         - "192.168.17.1/30"
-      routing_to_edge_edge_ipv4: "192.168.17.2"
+      routing_to_edge_edge_ipv4: "{{ wireguard.peer.ip | default(192.168.17.2) }}"
