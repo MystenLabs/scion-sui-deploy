@@ -69,6 +69,7 @@
                     "enabled": true,
                     "users": [
                         {
+                            "roles": [ "writer" ],
                             "username": "anapaya",
                             "password_hashed": "$2a$10$W7LRMh1MAA7ptvA335U3g.WXMaCb.EHjUCKILXUkjKdm9lJV/0FBC"
                         }
@@ -174,7 +175,7 @@
                     },
                     "scion_mtu": 1472,
                     "neighbors": {{ edge_neighbors | to_nice_json }},
-                    "forwarding_key": "{{ edge_forwarding_key }}"
+                    "forwarding_key_ref": "{{ edge_forwarding_key }}"
                 }
             ]
         }

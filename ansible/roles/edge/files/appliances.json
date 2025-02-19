@@ -7,7 +7,8 @@
                     "name": "http-basic",
                     "params": {
                         "password": "anapaya",
-                        "username": "anapaya"
+                        "username": "anapaya",
+                        "role": "writer"
                     }
                 }
             }

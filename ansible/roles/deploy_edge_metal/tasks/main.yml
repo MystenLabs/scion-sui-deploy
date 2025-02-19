@@ -1,6 +1,6 @@
 ---
-- name: Install dependencies and create directories
-  ansible.builtin.import_tasks: tasks/init.yml
+#- name: Install dependencies and create directories
+#  ansible.builtin.import_tasks: tasks/init.yml
 
 - name: Virtualize the public interface - SR-IOV
   ansible.builtin.import_tasks: tasks/interface-sriov.yml
