@@ -13,10 +13,14 @@
           - 192.168.18.2/24
       - name: "{{ network_config.if_name | default('enp1s0')}}"
         driver: VPP_DPDK
-        gateway:
-          ipv4_gateway: "{{ network_config.gateway }}"
+        routes:
+          - via: "{{ network_config.gateway }}"
+            to: "0.0.0.0/0"
+            sequence_id: 1
+            comment: "default route"
         addresses:
           - "{{ network_config.ipv4_cidr }}"
+          - "{{ network_config.ipv6_cidr }}"
           - "fd00:05c1:0400::2/126"
     bgp_ethernet:
       - name: "{{ network_config.bgp_if_name | default('enp6s0')}}"
