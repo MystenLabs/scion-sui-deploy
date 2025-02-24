@@ -6,4 +6,4 @@
   ansible.builtin.import_playbook: edge.yml
   tags: edge
   vars:
-    ansible_run_tags: ["config", "keys", "trcs"]
+    ansible_run_tags: ["config", "keys", "trcs", "metrics"]

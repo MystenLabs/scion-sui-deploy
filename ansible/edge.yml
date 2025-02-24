@@ -13,10 +13,14 @@
           - 192.168.18.2/24
       - name: "{{ network_config.if_name | default('enp1s0')}}"
         driver: VPP_DPDK
-        gateway:
-          ipv4_gateway: "{{ network_config.gateway }}"
+        routes:
+          - via: "{{ network_config.gateway }}"
+            to: "0.0.0.0/0"
+            sequence_id: 1
+            comment: "default route"
         addresses:
           - "{{ network_config.ipv4_cidr }}"
+          - "{{ network_config.ipv6_cidr }}"
           - "fd00:05c1:0400::2/126"
     bgp_ethernet:
       - name: "{{ network_config.bgp_if_name | default('enp6s0')}}"
@@ -41,9 +45,9 @@
       edge_key_local_path: "{{ scion_private_key_path }}"
       edge_cert_local_path: "{{ scion_certificate_path }}"
       edge_router_internal_port: 30999
-      edge_forwarding_key: "{{ lookup('ansible.builtin.file', scion_forwarding_key_path) }}"
+      edge_forwarding_key: "{{ forwarding_key | default(lookup('ansible.builtin.file', scion_forwarding_key_path)) }}"
       edge_internal_ipv4: "{{ network_config.ipv4_cidr | ansible.utils.ipaddr('address') }}"
-      edge_bgp_neighbor_address: "{{ bgp_neighbor_address | default('192.168.17.1') }}"
+      edge_bgp_neighbor_address: "{{ wireguard.peer.ip | default('192.168.17.1') }}"
       edge_neighbors: "{{ package_scion_neighbors }}"
       edge_advertised_ranges: >-
         {{ lookup('ansible.builtin.file', 'files/advertised_ip_ranges.yml') | from_yaml }}

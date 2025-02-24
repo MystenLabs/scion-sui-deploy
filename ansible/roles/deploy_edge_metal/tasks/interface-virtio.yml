@@ -32,7 +32,6 @@
   become: true
   when: netplan_file.stat.exists
 
-
 - name: Apply netplan configuration
   ansible.builtin.command: netplan apply
   become: true

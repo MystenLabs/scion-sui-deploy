@@ -1,0 +1,46 @@
+---
+# The bare-metal hosts that will be running both the Sui validator and hosting the EDGE VM.
+bare_metal_hosts:
+  hosts:
+    baremetal-suival:
+
+# The inventory hostname used to refer to the edge.
+edge_vms:
+  hosts:
+    edge:
+
+all:
+  vars:
+
+regionA:
+  hosts:
+    baremetal-suival:
+      # -- SSH options
+      # if you are running this playbook locally, this would be localhost. Otherwise it needs to be an IP or DNS resolvable hostname.
+      ansible_host: "{{ undef(hint='You must specify the ansible host, e.g. localhost') }}"
+      # this username needs to have SSH login privileges (SSH key setup) on the ansible_host setup above.
+      ansible_user: "{{ undef(hint='You must specify the ansible username, e.g., ubuntu') }}"
+
+      # -- Configuration
+      # Public IP addresses of the Sui Full Node/Valdator 
+      public_ipv4: "{{ undef(hint='You must specify the public IPv4 of your Sui node, e.g. xxx.xxx.xxx.xxx') }}"
+      public_ipv6: "{{ undef(hint='You must specify the public IPv6 of your Sui node, e.g. xxx.xxx.xxx.xxx') }}" # this is the wg tunnel underlay IP
+      frr_interface_name: "wg0"
+
+      # -- Wireguard configuration
+      wireguard:
+        interface:
+          addresses: 
+            - "{{ undef(hint='You must specify at least one wireguard ip of your wg0 interface, e.g. xxx.xxx.xxx.xxx/32') }}" # the wireguard interface IP address
+          private_key: ""  # will be overridden by generated_wireguard_private_key if available
+          listen_port: 51820  # default
+
+        peers:
+          - public_key: "{{ undef(hint='You must specify the wireguard peer public key') }}" # the wireguard peer public key
+            endpoint: "{{ undef(hint='You must specify the peer public IP and port. for ipv6 include [] around ipv6 addr e.g. [<peer_public_ipv6>]:51820') }}"  # public IPv6 of wireguard peer:port
+            allowed_ips: # must at least have allowed_ips defined. this generally should only be your wireguard ip range here. The scion cidr ranges are pulled from advertised_ip_ranges.yml
+              - 10.0.0.0/24
+            persistent_keepalive: 25  # default
+            ip: "{{ undef(hint='You must specify the peer wireguard tunnel IP e.g. xxx.xxx.xxx.xxx') }}" # the peer wireguard interface IP address, used for bgp config generation
+      
+  vars:
