@@ -1,0 +1,30 @@
+
+export EDGE_DOWNLOAD_TOKEN=""
+
+sudo apt install qemu-kvm libvirt-daemon-system qemu-utils qemu-system-x86 virtinst -y
+
+EDGE_VERSION=sys_v2.15.0-scion_v0.39.2-1
+wget https://dl.cloudsmith.io/$EDGE_DOWNLOAD_TOKEN/anapaya/stable/raw/names/anapaya-appliance-base-uefi-qcow2/versions/$EDGE_VERSION/anapaya-appliance-base-$EDGE_VERSION-uefi.qcow2 -O appliance-uefi.qcow2
+
+EDGE_NAME="edge01"
+EDGE_FILENAME=$EDGE_NAME.qcow2
+
+virsh pool-define-as --name pool --type dir --target .
+virsh pool-autostart pool
+virsh pool-start pool
+virsh vol-create-as pool vol 5G --format qcow2
+virsh vol-upload vol edge01.qcow2 --pool pool
+
+virt-install \
+  --name $EDGE_NAME \
+  --virt-type kvm \
+  --memory 16384  \
+  --vcpus 4 \
+  --cpu host \
+  --boot hd \
+  --disk vol=pool/vol \
+  --os-variant ubuntu24.04 \
+  --graphics none \
+  --network bridge=scionwan \
+  --network bridge=virbr_scion \
+  --import --noautoconsole
