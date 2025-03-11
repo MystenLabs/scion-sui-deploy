@@ -1,4 +1,6 @@
 
+# be sure to setup netplan with the scionwan and virbr_scion bridges before starting the Edge VM
+
 export EDGE_DOWNLOAD_TOKEN=""
 
 sudo apt install qemu-kvm libvirt-daemon-system qemu-utils qemu-system-x86 virtinst -y
