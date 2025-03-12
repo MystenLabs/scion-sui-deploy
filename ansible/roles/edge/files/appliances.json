@@ -1,0 +1,20 @@
+{
+    "default": {
+        "base": "https://localhost:443",
+        "profiles": {
+            "default": {
+                "auth": {
+                    "name": "http-basic",
+                    "params": {
+                        "password": "anapaya",
+                        "username": "anapaya",
+                        "role": "writer"
+                    }
+                }
+            }
+        },
+        "tls": {
+            "insecure": true
+        }
+    }
+}

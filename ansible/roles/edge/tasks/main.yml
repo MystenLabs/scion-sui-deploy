@@ -1,0 +1,24 @@
+---
+- name: Initialize system
+  ansible.builtin.import_tasks: init.yml
+  tags:
+  - init
+- name: Configure dedicated appliance
+  ansible.builtin.import_tasks: appliance.yml
+  when: 'deploy_type is defined and deploy_type == "dedicated"'
+  tags:
+  - config
+- name: Configure appliance - minimal
+  ansible.builtin.import_tasks: appliance.yml
+  when: 'deploy_type is undefined or deploy_type == "shared"'
+  tags:
+  - config 
+- name: Render appliance config locally
+  ansible.builtin.import_tasks: render_template.yml
+  when: "'render' in ansible_run_tags"
+  tags:
+  - render
+- name: Configure Grafana Agent
+  ansible.builtin.import_tasks: grafana-agent.yml
+  tags:
+  - metrics

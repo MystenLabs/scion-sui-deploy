@@ -1,0 +1,17 @@
+---
+- name: Install WireGuard
+  import_tasks: install.yml
+
+- name: Generate WireGuard keys if needed
+  import_tasks: keys.yml
+
+- name: Configure WireGuard
+  import_tasks: config.yml
+
+- name: Run the playbook to setup the sui-node to wireguard peer
+  import_role:
+    name: routing_to_edge
+  vars:
+    routing_to_edge_interface: "wg0"
+    routing_to_edge_addresses: "{{ (['fd00:05c1:0400::1/126'] + (wireguard.interface.addresses)) | join(',') }}"
+    routing_to_edge_edge_ipv4: "{{ wireguard.peers | map(attribute='ip') | join(',') }}"

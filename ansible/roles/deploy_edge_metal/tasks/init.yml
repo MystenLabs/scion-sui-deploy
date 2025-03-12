@@ -1,0 +1,39 @@
+---
+- name: init | Ensure ansible_facts used by role
+  ansible.builtin.setup:
+    gather_subset: interfaces
+  when: not ansible_facts.keys() | list |
+    intersect(__deploy_edge_metal_required_facts) == __deploy_edge_metal_required_facts
+
+- name: init | Install package dependencies
+  ansible.builtin.apt:
+    package:
+      - qemu-kvm
+      - cloud-utils
+      - libvirt-daemon-system
+      - libguestfs-tools
+      - virtinst
+    update_cache: true
+  become: true
+
+- name: init | Add the remote user to the libvirt group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: libvirt
+    append: true
+  become: true
+  notify: "deploy_edge_metal : reset ssh"
+
+- name: init | Flush handlers to update user's groups, if required
+  ansible.builtin.meta: flush_handlers
+
+- name: init | Create deployment directory
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "u=rwX,g=rX,o=rX"
+    owner: "{{ ansible_user }}"
+  loop:
+    - "{{ deploy_edge_metal_scion_dir }}"
+    - "{{ deploy_edge_metal_deployment_dir }}"
+  become: true

@@ -1,0 +1,20 @@
+---
+- name: Generate WireGuard private key if none is provided
+  ansible.builtin.command: wg genkey
+  register: wireguard_private_key_generation
+  when: wireguard_private_key == ""
+
+- name: Register WireGuard private key as a fact
+  set_fact:
+    generated_wireguard_private_key: "{{ wireguard_private_key_generation.stdout }}"
+  when: wireguard_private_key == ""
+
+- name: Generate WireGuard public key
+  ansible.builtin.command: echo "{{ generated_wireguard_private_key | default(wireguard_private_key) }}" | wg pubkey
+  register: wireguard_public_key_generation
+  when: wireguard_public_key == ""
+
+- name: Register WireGuard public key as a fact
+  set_fact:
+    generated_wireguard_public_key: "{{ wireguard_public_key_generation.stdout }}"
+  when: wireguard_public_key == ""

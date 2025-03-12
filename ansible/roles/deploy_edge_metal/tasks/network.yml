@@ -1,0 +1,71 @@
+---
+- name: network | Define the scion_internal network
+  ansible.builtin.command:
+    cmd: virsh net-define /dev/stdin
+    stdin: |
+      <network>
+        <name>{{ __deploy_edge_metal_internal_network_name }}</name>
+        <title>Host to SCION Edge communication</title>
+        <description>A link local network between the host and the SCION Edge guest VM</description>
+        <bridge name="virbr_scion" stp="on" macTableManager="libvirt"/>
+        <mtu size="1500"/>
+        <ip family='ipv4' address='192.168.18.1' prefix='24'>
+          <dhcp>
+            <range start='192.168.18.2' end='192.168.18.2'/>
+          </dhcp>
+        </ip>
+        <dns enable='no'/>
+      </network>
+  register: __define_network
+  failed_when: '__define_network.rc != 0 and "already exists" not in __define_network.stderr'
+  changed_when: __define_network.rc == 0
+  become: true
+
+- name: network | Define the bgp network
+  when: __deploy_edge_metal_bgp_bridge
+  ansible.builtin.command:
+    cmd: virsh net-define /dev/stdin
+    stdin: |
+      <network>
+        <name>{{ __deploy_edge_metal_bgp_network_name }}</name>
+        <title>Host to SCION Edge communication</title>
+        <description>A link local network between the host and the SCION Edge guest VM</description>
+        <bridge name="scion_bgp" stp="on" macTableManager="libvirt"/>
+        <mtu size="1500"/>
+        <ip family='ipv4' address='192.168.17.1' prefix='24'>
+          <dhcp>
+            <range start='192.168.17.2' end='192.168.17.2'/>
+          </dhcp>
+        </ip>
+        <dns enable='no'/>
+      </network>
+  register: __define_bgp_network
+  failed_when: '__define_bgp_network.rc != 0 and "already exists" not in __define_bgp_network.stderr'
+  changed_when: __define_bgp_network.rc == 0
+  become: true
+
+- name: network | Autostart the network
+  ansible.builtin.command: virsh net-autostart {{ __deploy_edge_metal_internal_network_name }}
+  changed_when: __define_network.changed
+  become: true
+
+- name: network | Start the edge management network
+  ansible.builtin.command: virsh net-start --network {{ __deploy_edge_metal_internal_network_name }}
+  register: __start_result
+  changed_when: __start_result.rc == 0
+  failed_when: __start_result.rc != 0 and "network is already active" not in __start_result.stderr
+  become: true
+
+- name: network | Autostart the bgp network
+  ansible.builtin.command: virsh net-autostart {{ __deploy_edge_metal_bgp_network_name }}
+  changed_when: __define_bgp_network.changed
+  when: __deploy_edge_metal_bgp_bridge
+  become: true
+
+- name: network | Start the bgp network
+  ansible.builtin.command: virsh net-start --network {{ __deploy_edge_metal_bgp_network_name }}
+  register: __start_bgp_result
+  changed_when: __start_bgp_result.rc == 0
+  failed_when: __start_bgp_result.rc != 0 and "network is already active" not in __start_bgp_result.stderr
+  when: __deploy_edge_metal_bgp_bridge
+  become: true

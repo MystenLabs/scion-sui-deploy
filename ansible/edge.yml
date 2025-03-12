@@ -1,0 +1,54 @@
+---
+- name: Configure the EDGE appliance
+  hosts: edge_vms
+  gather_facts: false
+  vars_files:
+    - "{{ deployment_package_config }}"
+  vars:
+    host_ipv4: "{{ hostvars[vm_host]['public_ipv4'] }}"
+    base_ethernets:
+      - name: "{{ network_config.mgmt_if_name | default('enp2s0')}}"
+        driver: LINUX
+        addresses:
+          - 192.168.18.2/24
+      - name: "{{ network_config.if_name | default('enp1s0')}}"
+        driver: VPP_DPDK
+        routes:
+          - via: "{{ network_config.gateway }}"
+            to: "0.0.0.0/0"
+            sequence_id: 1
+            comment: "default route"
+        addresses:
+          - "{{ network_config.ipv4_cidr }}"
+          - "{{ network_config.ipv6_cidr }}"
+          - "fd00:05c1:0400::2/126"
+    bgp_ethernet:
+      - name: "{{ network_config.bgp_if_name | default('enp6s0')}}"
+        driver: VPP_DPDK
+        addresses:
+          - "192.168.17.2/30"
+  pre_tasks:
+    - name: Wait up to 10m for a connection to the EDGE
+      ansible.builtin.wait_for_connection:
+        timeout: 600
+    - name: Wait up to 10m for the VM installation to complete
+      ansible.builtin.wait_for:
+        path: /home/anapaya/.setup_complete
+        timeout: 600
+        sleep: 10
+  roles:
+    - role: edge
+      edge_isd_as: "{{ package_isd_as }}"
+      edge_issuer_isd_as: "{{ package_issuer_isd_as }}"
+      edge_scion_name: "{{ package_common_name }}"
+      edge_trcs_dir: "{{ scion_trcs_path }}"
+      edge_key_local_path: "{{ scion_private_key_path }}"
+      edge_cert_local_path: "{{ scion_certificate_path }}"
+      edge_router_internal_port: 30999
+      edge_forwarding_key: "{{ forwarding_key | default(lookup('ansible.builtin.file', scion_forwarding_key_path)) }}"
+      edge_internal_ipv4: "{{ network_config.ipv4_cidr | ansible.utils.ipaddr('address') }}"
+      edge_bgp_neighbor_address: "{{ wireguard.peer.ip | default('192.168.17.1') }}"
+      edge_neighbors: "{{ package_scion_neighbors }}"
+      edge_advertised_ranges: >-
+        {{ lookup('ansible.builtin.file', 'files/advertised_ip_ranges.yml') | from_yaml }}
+      edge_ethernets: "{{ base_ethernets + bgp_ethernet if enable_bgp_interface | default(false) else base_ethernets }}"

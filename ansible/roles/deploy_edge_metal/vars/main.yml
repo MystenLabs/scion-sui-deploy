@@ -1,0 +1,36 @@
+---
+deploy_edge_metal_edge_url: "\
+  https://dl.cloudsmith.io/{{ deploy_edge_metal_download.access_token }}/anapaya/stable/raw/names/\
+  anapaya-appliance-base-bios-qcow2/versions/{{ deploy_edge_metal_download.version }}/\
+  anapaya-appliance-base-{{ deploy_edge_metal_download.version }}-bios.qcow2"
+# Directory in which to store deployment files on the remote.
+deploy_edge_metal_scion_dir: /var/scion
+deploy_edge_metal_deployment_dir: "{{ deploy_edge_metal_scion_dir }}/deployment"
+# Directory in which to store libvirt SCION images.
+deploy_edge_metal_storage_pool_dir: "{{ deploy_edge_metal_scion_dir }}/images"
+# Facts required by the role
+__deploy_edge_metal_required_facts:
+  - interfaces
+  - "{{ deploy_edge_metal_public_interface }}"
+# Path to the downloaded Anapaya EDGE image.
+__deploy_edge_metal_image_stem: >-
+  anapaya-appliance-base-{{ deploy_edge_metal_download.version }}-bios-compressed
+__deploy_edge_metal_image: >-
+  {{ deploy_edge_metal_deployment_dir }}/{{ __deploy_edge_metal_image_stem }}.qcow2
+# Path to the customized Anapaya EDGE image.
+__deploy_edge_metal_customized_image: >-
+  {{ deploy_edge_metal_deployment_dir }}/{{ __deploy_edge_metal_image_stem }}.customized.qcow2
+# Name and capacity of the EDGE storage volume created in libvirt.
+__deploy_edge_metal_volume_name: edge-{{ deploy_edge_metal_download.version }}-bios-compressed
+__deploy_edge_metal_volume_capacity: 40G
+# Storage pool to create and store image
+__deploy_edge_metal_storage_pool_name: edge-images
+# Name of the libvirt network to create for host to EDGE communication
+__deploy_edge_metal_internal_network_name: scion_internal
+# Name, memory, and vcpus of the EDGE domain (VM) created on libvirt
+__deploy_edge_metal_vm_name: anapaya-edge
+__deploy_edge_metal_vm_memory_mib: "{{ vm_memory_mib | default(2048) }}"
+__deploy_edge_metal_vm_vcpus: "{{ vm_vcpus | default(2) }}"
+__deploy_edge_metal_virt_type: "{{ deploy_edge_metal_virt_type | default('virtio') }}"
+__deploy_edge_metal_bgp_bridge: "{{ deploy_edge_metal_bgp_bridge | default(false) }}"
+__deploy_edge_metal_bgp_network_name: scion_bgp

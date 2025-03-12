@@ -1,0 +1,314 @@
+#jinja2: trim_blocks:False
+{
+    "config": {
+        "system": {
+            "dns": {
+                "servers": [
+                {% for server in dns %}
+                    {{- server | to_json }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+                ]
+            },
+            "vpp": {
+                "tun": {
+                    "prefixes": []
+                }
+            }
+        },
+        "management": {
+            "ssh": {
+                "users": [
+                    {
+                        "username": "anapaya",
+                        "ssh_keys": [
+                        {% for key_string in ssh_authorized_keys %}
+                            {% set key_map = key_string | parse_ssh_key %}
+                            {
+                                "key": {{ key_map.key | format_edge_key | to_json }},
+                                "description": {{ key_map.name | to_json }}
+                            }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                        ]
+                    }
+                ]
+            },
+            {% if appliance_hostname is defined %}
+            "hostname": "{{ appliance_hostname }}",
+            {% endif %}
+            "telemetry": {
+            {% if logging_url is defined %}
+                "logging": {
+                    "logging_type": "LOKI",
+                    "loki": {
+                        "url": "{{ logging_url }}"
+                    }
+                },
+            {% endif %}
+            {% if metrics_labels is defined %}
+                "address": "192.168.18.2:42001",
+                "labels": [
+                {%for key,value in metrics_labels.items() %}
+                    {{- "{" }}
+                    "label": "{{ key }}",
+                    "value": "{{ value }}"
+                    {{ "}" }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+                ]
+            {% else %}
+                "address": "192.168.18.2:42001"
+            {% endif %}
+            },
+            "api": {
+                "listeners": [
+                    {
+                        "address": "127.0.0.1:443",
+                        "description": "localhost"
+                    }
+                ],
+                "basic_auth": {
+                    "enabled": true,
+                    "users": [
+                        {
+                            "roles": [ "writer" ],
+                            "username": "anapaya",
+                            "password_hashed": "$2a$10$W7LRMh1MAA7ptvA335U3g.WXMaCb.EHjUCKILXUkjKdm9lJV/0FBC"
+                        }
+                    ]
+                }
+            }
+        },
+        "interfaces": {
+            {% if wireguard is defined and wireguard.interface is defined %}
+            "wireguards": [
+                {
+                    "addresses": [
+                        {% for address in wireguard.interface.addresses %}
+                        "{{ address }}"{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    "name": "wg0",
+                    "peers": [
+                        {% if wireguard.peers is defined %}
+                        {% for peer in wireguard.peers %}
+                        {
+                            "allowed_ips": [
+                                {% for ip in peer.allowed_ips %}
+                                "{{ ip }}"{% if not loop.last %},{% endif %}
+                                {% endfor %}
+                            ]{% if peer.endpoint is defined %},
+                            "endpoint": "{{ peer.endpoint }}"{% endif %}{% if peer.public_key is defined %},
+                            "public_key": "{{ peer.public_key }}"{% endif %}{% if peer.persistent_keepalive is defined %},
+                            "persistent_keepalive": {{ peer.persistent_keepalive }}{% endif %}
+                        }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                        {% else %}
+                        {
+                            "allowed_ips": [
+                                "0.0.0.0/0"
+                            ]
+                        }
+                        {% endif %}
+                    ],
+                    "port": {{ wireguard.interface.listen_port | default(51021) }},
+                    "routes": []
+                }
+            ],
+            {% endif %}
+            "ethernets": {{ edge_ethernets | to_nice_json }}
+        },
+        "firewall": {
+            "mode": "PREPEND",
+            "tables": [
+                {
+                    "chains": [
+                        {
+                            "name": "default_forward",
+                            "rules": [
+                                {
+                                    "comment": "allow wg0 to forward",
+                                    "rule": "iifname \"wg0\" counter name \"wg_forward\" accept",
+                                    "sequence_id": 0
+                                },
+                                {
+                                    "comment": "allow wg0 return forward",
+                                    "rule": "oifname \"wg0\" counter name \"wg_return\" accept",
+                                    "sequence_id": 1
+                                }
+                            ]
+                        }
+                    ],
+                    "counters": [
+                        {
+                            "name": "wg_forward"
+                        },
+                        {
+                            "name": "wg_return"
+                        }
+                    ],
+                    "family": "INET",
+                    "name": "appliance"
+                }
+            ]
+        },
+        "scion": {
+            "ases": [
+                {
+                    "control": {
+                        "address": "{{ edge_internal_ipv4 }}:30252",
+                        "enabled": true
+                    },
+                    "cppki": {
+                        "issuers": [
+                            {
+                                "isd_as": "{{ edge_issuer_isd_as }}",
+                                "priority": 0
+                            }
+                        ]
+                    },
+                    "details": {
+                        "name": "{{ edge_scion_name }}"
+                    },
+                    "isd_as": "{{ edge_isd_as }}",
+                    "router": {
+                        "enabled": true,
+                        "internal_interface": "{{ edge_internal_ipv4 }}:{{ edge_router_internal_port }}"
+                    },
+                    "scion_mtu": 1472,
+                    "neighbors": {{ edge_neighbors | to_nice_json }},
+                    "forwarding_key_ref": "{{ edge_forwarding_key }}"
+                }
+            ]
+        }
+        {% if edge_advertised_ranges|length %},
+        "scion_tunneling": {
+            "endpoint": {
+                "enabled": true,
+                "ip": "{{ edge_internal_ipv4 }}"
+            },
+            "domains": [
+{%  for item in (edge_advertised_ranges | rejectattr('isd_as', 'match', edge_isd_as)) %}
+                {
+                    "name": "{{ item.isd_as  }}",
+                    "remote_isd_ases": [
+                        {
+                            "isd_as": "{{ item.isd_as }}",
+                            "action": "ACCEPT",
+                            "sequence_id": 0
+                        }
+                    ],
+                    "prefixes": {
+                        "accept_filter": [
+                            {
+                                "prefixes": {{ item.cidr_ranges | to_json }},
+                                "action": "ACCEPT",
+                                "sequence_id": 0
+                            }
+                        ],
+                        "announce_filter": [
+                            {
+                                "prefixes": [
+                                    "0.0.0.0/0"
+                                ],
+                                "action": "ACCEPT",
+                                "sequence_id": 0
+                            }
+                        ]
+                    },
+                    "traffic_policies": [
+                        {
+                            "sequence_id": 0,
+                            "traffic_matcher": "default",
+                            "failover_sequence": [
+                                {
+                                    "sequence_id": 0,
+                                    "path_filter": "allow_all"
+                                }
+                            ]
+                        }
+                    ]
+                }{{ "," if not loop.last else "" }}
+{%  endfor %}
+            ],
+            "remotes": [
+{%  for item in (edge_advertised_ranges | rejectattr('isd_as', 'match', edge_isd_as)) %}
+                {"isd_as": "{{ item.isd_as }}"}{{ "," if not loop.last else "" }}
+{%  endfor %}
+            ],
+            "static_announcements": [
+                {
+                    "next_hop_tracking": {
+                        "disabled": false,
+                        "target": "192.168.17.1"
+                    },
+                    "prefixes": {{
+                        (edge_advertised_ranges | items2dict(key_name='isd_as', value_name='cidr_ranges'))[edge_isd_as]
+                        | to_nice_json }},
+                    "sequence_id": 0
+                }
+            ],
+            "traffic_matchers": [
+                {
+                    "condition": "BOOL=true",
+                    "name": "default"
+                }
+            ],
+            "path_filters": [
+                {
+                    "name": "allow_all",
+                    "description": "Allow all paths",
+                    "acl": [
+                        "+ 0"
+                    ]
+                }
+            ]
+        },
+        {% endif %}
+        {%- if wireguard.peers is defined and wireguard.peers | length > 0 -%}
+        "bgp": {
+            "global": {
+                "as": {{ edge_bgp_asn }},
+                "router_id": "{{ edge_internal_ipv4 }}"
+            },
+            "neighbors": [
+                {% for peer in wireguard.peers %}
+                {
+                    "enabled": true,
+                    "neighbor_address": "{{ peer.ip }}",
+                    "peer_as": {{ edge_bgp_peer_asn }},
+                    {% if ebgp_multihop is defined %}
+                    "ebgp_multihop": {{ ebgp_multihop }},
+                    {% endif %}
+                    "timers": {
+                        "hold_time": 3,
+                        "keepalive_interval": 1,
+                        "minimum_advertisement_interval": 1
+                    }
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ]
+        }
+      {% else %}
+        "bgp": {
+            "global": {
+                "as": {{ edge_bgp_asn }},
+                "router_id": "{{ edge_internal_ipv4 }}"
+            },
+            "neighbors": [
+                {
+                    "enabled": true,
+                    "neighbor_address": "{{ edge_bgp_neighbor_address }}",
+                    "peer_as": {{ edge_bgp_peer_asn }},
+                    {% if ebgp_multihop is defined %}
+                    "ebgp_multihop": {{ ebgp_multihop }},
+                    {% endif %}
+                    "timers": {
+                        "hold_time": 3,
+                        "keepalive_interval": 1,
+                        "minimum_advertisement_interval": 1
+                    }
+                }
+            ]
+        }
+        {% endif %}
+    }
+}

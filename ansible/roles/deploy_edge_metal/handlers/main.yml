@@ -1,0 +1,15 @@
+---
+- name: Reset the SSH connection
+  ansible.builtin.meta: reset_connection
+  listen: "deploy_edge_metal : reset ssh"
+
+- name: Update grub # noqa: no-changed-when
+  become: true
+  ansible.builtin.command: update-grub
+  listen: "deploy_edge_metal : update grub"
+
+- name: Reboot the bare-metal host
+  become: true
+  ansible.builtin.reboot:
+    msg: "Rebooting machine in 5 seconds"
+  listen: "deploy_edge_metal : reboot host"

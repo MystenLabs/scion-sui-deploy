@@ -1,0 +1,19 @@
+---
+- name: Restart sshd
+  ansible.builtin.systemd:
+    name: sshd
+    state: restarted
+  become: true
+  listen: "edge : restart sshd"
+
+- name: Restart Grafana Agent service
+  systemd:
+    name: "grafana-agent"
+    state: restarted
+  become: true
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+  become: true
+

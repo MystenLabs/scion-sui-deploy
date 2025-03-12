@@ -1,0 +1,95 @@
+---
+- name: Create appliance-cli configuration directory
+  ansible.builtin.file:
+    path: "{{ edge_cli_config_directory }}"
+    state: directory
+    owner: anapaya
+    group: users
+    mode: "0700"
+  tags:
+  - config
+
+- name: Copy configuration files for appliance-cli
+  ansible.builtin.copy:
+    dest: "{{ edge_cli_config_directory }}/{{ item }}"
+    src: "{{ item }}"
+    owner: anapaya
+    group: users
+    mode: "0600"
+  loop:
+    - "{{ edge_cli_config_file }}"
+    - "{{ edge_cli_context_file }}"
+  tags:
+  - config
+
+- name: Configure appliance
+  tags: config
+  module_defaults:
+    ansible.builtin.uri:
+      force_basic_auth: true
+      url_username: anapaya
+      url_password: anapaya
+      validate_certs: false
+  block:
+    - name: Get current appliance configuration
+      ansible.builtin.uri:
+        url: https://127.0.0.1/api/v1/config
+        method: GET
+      register: edge_appliance_config
+
+    - name: Put appliance configuration for dedicated edge
+      ansible.builtin.uri:
+        url: https://127.0.0.1/api/v1/config
+        method: PUT
+        body_format: json
+        body: "{{ lookup('ansible.builtin.template', 'appliance.json.j2') }}"
+      register: _this
+      changed_when: _this.json != edge_appliance_config.json
+      when: 'deploy_type is defined and deploy_type == "dedicated"'
+
+    - name: Put minimal appliance configuration for shared edge
+      ansible.builtin.uri:
+        url: https://127.0.0.1/api/v1/config
+        method: PUT
+        body_format: json
+        body: "{{ lookup('ansible.builtin.template', 'appliance-minimal.json.j2') }}"
+      register: _this
+      changed_when: _this.json != edge_appliance_config.json
+      when: 'deploy_type is undefined or deploy_type == "shared"'
+
+    - name: Add TRCs
+      tags: trcs
+      ansible.builtin.uri:
+        url: https://127.0.0.1/api/v1/cppki/trcs/bundle
+        method: POST
+        src: "{{ item }}"
+        return_content: true
+      loop: "{{ query('fileglob', edge_trcs_dir + '/*') }}"
+      register: _this
+      failed_when:
+        - _this is failed
+        - "'already exists' not in _this.content"
+      changed_when: _this is not failed
+
+- name: Copy control-plane key and certificate files if they exist locally
+  tags: 
+  - config
+  - keys
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ edge_scion_cert_key_filename_without_suffix }}.{{ item.suffix }}"
+    owner: scion
+    group: scion
+    mode: "{{ item.mode }}"
+    force: "{{ edge_force_replace_cert_key }}"
+  loop:
+    - src: "{{ edge_key_local_path }}"
+      suffix: key
+      mode: "0600"
+      log: false
+    - src: "{{ edge_cert_local_path }}"
+      suffix: pem
+      mode: "0644"
+  become: true
+  when: lookup("ansible.builtin.file", item.src, errors="ignore")
+  no_log: "{{ not (item.log | default(true)) }}"

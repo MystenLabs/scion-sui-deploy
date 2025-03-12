@@ -1,0 +1,49 @@
+---
+- name: Ensure /etc/grafana directory exists
+  file:
+    path: /etc/grafana
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  tags:
+    - metrics
+
+- name: Template grafana-agent configuration file
+  template:
+    src: agent-config.yaml.j2
+    dest: /etc/grafana/agent-config.yaml
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify:
+    - Restart Grafana Agent service
+    - Reload systemd daemon
+  tags:
+    - metrics
+
+- name: Copy systemd service file
+  template:
+    src: grafana-agent.service.j2
+    dest: /etc/systemd/system/grafana-agent.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify:
+    - Reload systemd daemon
+  tags:
+    - metrics
+
+- name: Enable and start the new service
+  systemd:
+    name: "grafana-agent"
+    enabled: yes
+    state: started
+  become: yes
+  tags:
+    - metrics
+
+

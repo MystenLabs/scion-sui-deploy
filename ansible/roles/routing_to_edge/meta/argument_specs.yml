@@ -1,0 +1,32 @@
+---
+argument_specs:
+  main:
+    description: Configure routing for Sui node with associated EDGE
+
+    options:
+      routing_to_edge_edge_ipv4:
+        description: The internal IP address of the EDGE device
+        type: list
+        elements: str
+        required: true
+
+      routing_to_edge_interface:
+        description: The network interface to configure
+        type: str
+        required: true
+
+      routing_to_edge_addresses:
+        description: Additional IPv4 and IPv6 addresses (CIDR) to add to the interface
+        type: list
+        elements: str
+        default: []
+
+      routing_to_edge_bgp_asn:
+        description: The (private) ASN to use for BGP on the node
+        type: int
+        default: 65002
+
+      routing_to_edge_bgp_edge_asn:
+        description: The (private) ASN to use for BGP on the EDGE
+        type: int
+        default: 65001

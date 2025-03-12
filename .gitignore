@@ -1,0 +1,4 @@
+ansible.cfg
+hosts.yml
+
+**/__pycache__/*

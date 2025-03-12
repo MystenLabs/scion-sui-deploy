@@ -1,0 +1,33 @@
+---
+- name: Allow the anapaya user to run all commands
+  community.general.sudoers:
+    name: allow-anapaya
+    state: present
+    user: anapaya
+    commands: ALL
+  become: true
+
+- name: Disable SSH password authentication
+  ansible.builtin.lineinfile:
+    path: '/etc/ssh/ssh_config'
+    regexp: '^(.*)PasswordAuthentication(.*)$'
+    line: 'PasswordAuthentication no'
+  become: true
+  notify:
+    - "edge : restart sshd"
+
+- name: init | Add DNS entries for public interface
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: "^#?DNS="
+    line: "DNS={{ edge_dns_servers | join(' ') }}"
+  become: true
+  register: __resolved
+
+- name: init | Start/restart the DNS resolver
+  ansible.builtin.systemd_service:
+    service: systemd-resolved
+    state: "{{ __resolved.changed | ternary('restarted', 'started') }}"
+    enabled: true
+    daemon_reload: true
+  become: true

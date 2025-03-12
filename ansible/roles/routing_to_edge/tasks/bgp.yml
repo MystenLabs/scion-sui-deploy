@@ -1,0 +1,32 @@
+---
+- name: Ensure frr is installed
+  ansible.builtin.apt:
+    name: frr
+    state: latest # noqa: package-latest
+  become: true
+
+- name: Enable BGP daemon
+  ansible.builtin.lineinfile:
+    path: /etc/frr/daemons
+    regexp: '^ *bgpd=(.*)$'
+    line: bgpd=yes
+  become: true
+  notify: "routing_to_edge : restart frr"
+
+- name: Add frr configuration
+  ansible.builtin.template:
+    src: frr.conf.j2
+    dest: /etc/frr/frr.conf
+    owner: frr
+    group: frr
+    mode: "640"
+  become: true
+  notify: "routing_to_edge : restart frr"
+
+- name: Enable and start frr service
+  ansible.builtin.systemd:
+    service: frr
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true
