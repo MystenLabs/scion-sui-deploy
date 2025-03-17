@@ -7,8 +7,8 @@
   vars:
     wireguard_interface: "wg0"
     wireguard_private_key: "{{ wireguard.interface.private_key }}"
-    wireguard_public_key: "{{ wireguard.peer.public_key }}"
-    wireguard_allowed_ips: "{{ wireguard.peer.allowed_ips }}"
-    wireguard_endpoint: "{{ wireguard.peer.endpoint }}"
-    wireguard_persistent_keepalive: "{{ wireguard.peer.persistent_keepalive }}"
+    wireguard_public_key: "{{ wireguard.interface.peer.public_key }}"
+    wireguard_allowed_ips: "{{ wireguard.interface.peer.allowed_ips }}"
+    wireguard_endpoint: "{{ wireguard.interface.peer.endpoint }}"
+    wireguard_persistent_keepalive: "{{ wireguard.interface.peer.persistent_keepalive }}"
     wireguard_config_path: "/etc/wireguard"

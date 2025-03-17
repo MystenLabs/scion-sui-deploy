@@ -19,10 +19,6 @@
  - isd_as: 66-2:0:7f
    cidr_ranges:
      - 202.182.103.246/32
-# mysten-scion-testnet-chi host primary nic
- - isd_as: 67-2:0:80
-   cidr_ranges:
-     - 91.242.214.70/32
 # scionsui-lat-lon1-01 host primary nic
  - isd_as: 65-2:0:89
    cidr_ranges:

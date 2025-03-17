@@ -1,8 +1,9 @@
 ---
-- name: Ensure WireGuard and wg-quick are installed (Debian/Ubuntu example)
+- name: Ensure WireGuard and wg-quick are installed (Debian/Ubuntu)
   ansible.builtin.package:
     name:
       - wireguard        # Provides kernel module & depends
       - wireguard-tools  # Provides wg and wg-quick
     state: present
   become: true
+  tags: setup
