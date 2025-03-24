@@ -1,0 +1,24 @@
+network:
+  version: 2
+  bridges:
+    virbr_scion:
+      dhcp4: yes
+      addresses:
+        - "192.168.18.2/24"
+    scionwan:
+      dhcp4: no
+      dhcp6: no
+      interfaces: [enp1s0f1]
+      addresses:
+        - "A.B.C.E/31"
+        - "X::Y/64"
+      nameservers:
+        addresses:
+        - 1.1.1.1
+        - 8.8.8.8
+        - 2001:4860:4860::8888
+      routes:
+        - to: "0.0.0.0/0"
+          via: A.B.C.D
+        - to: "::/0"
+          via: X::1
