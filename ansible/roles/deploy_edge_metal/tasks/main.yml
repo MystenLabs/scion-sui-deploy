@@ -1,16 +1,16 @@
 ---
-#- name: Install dependencies and create directories
-#  ansible.builtin.import_tasks: tasks/init.yml
+- name: Install dependencies and create directories
+  ansible.builtin.import_tasks: tasks/init.yml
 
 - name: Virtualize the public interface - SR-IOV
   ansible.builtin.import_tasks: tasks/interface-sriov.yml
   when: __deploy_edge_metal_virt_type == 'sriov'
   tags: sriov
 
-- name: Virtualize the public interface - virtio bridge
-  ansible.builtin.import_tasks: tasks/interface-virtio.yml
-  when: __deploy_edge_metal_virt_type == 'virtio'
-  tags: virtio
+#- name: Virtualize the public interface - virtio bridge
+#  ansible.builtin.import_tasks: tasks/interface-virtio.yml
+#  when: __deploy_edge_metal_virt_type == 'virtio'
+#  tags: virtio
 
 - name: Prepare the internal network
   ansible.builtin.import_tasks: tasks/network.yml

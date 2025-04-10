@@ -135,6 +135,9 @@ argument_specs:
               via:
                 type: str
                 required: true
+              comment:
+                description: A comment for the route
+                type: str
 
       edge_advertised_ranges:
         description: The list of IP ranges advertised by the AS SIGs

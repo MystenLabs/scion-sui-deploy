@@ -13,11 +13,6 @@
           - 192.168.18.2/24
       - name: "{{ network_config.if_name | default('enp1s0')}}"
         driver: VPP_DPDK
-        routes:
-          - via: "{{ network_config.gateway }}"
-            to: "0.0.0.0/0"
-            sequence_id: 1
-            comment: "default route"
         addresses:
           - "{{ network_config.ipv4_cidr }}"
           - "{{ network_config.ipv6_cidr }}"
@@ -31,11 +26,11 @@
     - name: Wait up to 10m for a connection to the EDGE
       ansible.builtin.wait_for_connection:
         timeout: 600
-    - name: Wait up to 10m for the VM installation to complete
-      ansible.builtin.wait_for:
-        path: /home/anapaya/.setup_complete
-        timeout: 600
-        sleep: 10
+    #- name: Wait up to 10m for the VM installation to complete
+    #  ansible.builtin.wait_for:
+    #    path: /home/anapaya/.setup_complete
+    #    timeout: 600
+    #    sleep: 10
   roles:
     - role: edge
       edge_isd_as: "{{ package_isd_as }}"
