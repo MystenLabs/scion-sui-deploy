@@ -4,30 +4,35 @@
    cidr_ranges:
      - 45.250.255.101/32
 # Mysten-5 ewr host primary nic
- - isd_as: 67-2:0:7f
-   cidr_ranges:
-    - 140.82.3.223/32
+# - isd_as: 67-2:0:7f
+#   cidr_ranges:
+#     - 140.82.3.223/32
 # Mysten-6 lhr host primary nic
- - isd_as: 65-2:0:5a
-   cidr_ranges:
-     - 209.250.224.204/32
+# - isd_as: 65-2:0:5a
+#   cidr_ranges:
+#     - 209.250.224.204/32
 # RubyNodes
- - isd_as: 66-2:0:7e
-   cidr_ranges:
-     - 45.250.255.116/32
+# - isd_as: 66-2:0:7e
+#   cidr_ranges:
+#     - 45.250.255.116/32
 # Mysten nrt host primary nic
- - isd_as: 66-2:0:7f
-   cidr_ranges:
-     - 202.182.103.246/32
+# - isd_as: 66-2:0:7f
+#   cidr_ranges:
+#     - 202.182.103.246/32
 # scionsui-lat-lon1-01 host primary nic
- - isd_as: 65-2:0:89
-   cidr_ranges:
-     - 103.50.32.105/32
+# - isd_as: 65-2:0:89
+#   cidr_ranges:
+#     - 103.50.32.105/32
 #  scionsui-lat-lon-04-artifact host primary nic
- - isd_as: 65-2:0:90
-   cidr_ranges:
-     - 67.213.117.209/32
+# - isd_as: 65-2:0:90
+#   cidr_ranges:
+#     - 67.213.117.209/32
 #  scionsui-lat-tyo03-02-node-infra host primary nic
- - isd_as: 66-2:0:8f
+# - isd_as: 66-2:0:8f
+#   cidr_ranges:
+#     - 109.94.99.111/32
+#- 
+#  scionsui-lat-lon-05
+ - isd_as: 65-2:0:91
    cidr_ranges:
-     - 109.94.99.111/32
+     - 67.213.126.51/32
