@@ -64,6 +64,8 @@
         method: POST
         src: "{{ item }}"
         return_content: true
+        user: "{{ edge_user }}"
+        password: "{{ trc_password }}"
       loop: "{{ query('fileglob', edge_trcs_dir + '/*') }}"
       register: _this
       failed_when:

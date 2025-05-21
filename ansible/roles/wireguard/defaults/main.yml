@@ -6,8 +6,8 @@ wireguard:
     private_key: ""  # will be overridden by generated_wireguard_private_key if available
     listen_port: 51820  # default
 
-  peer:
-    public_key: "" # the wireguard peer public key
-    allowed_ips: 
-    - "0.0.0.0/0" # can specify more specific ranges if desired 
-    endpoint: "" 
+    peer:
+      public_key: "" # the wireguard peer public key
+      allowed_ips: 
+      - "0.0.0.0/0" # can specify more specific ranges if desired 
+      endpoint: "" 
